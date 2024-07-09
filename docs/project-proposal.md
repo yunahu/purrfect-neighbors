@@ -14,6 +14,8 @@ We aim to create a user-friendly platform that allows users to adopt pets, share
 - Interactive map displaying locations of nearby adoptable pets and friendly pet products donations.
 - Allow users to post about sharing or exchange, and make comments on the posts.
 
+See the [Detailed Requirements](./detailed-requirements.md#detailed-requirements) for more information.
+
 ## ⚙️ Tech Stack
 
 - **Frontend:**
