@@ -1,14 +1,38 @@
+import styled, { createGlobalStyle } from "styled-components";
 import Navbar from "src/components/Navbar/Navbar";
-import Footer from "src/components/Footer/Footer";
 import Router from "src/Router/Router";
+import Footer from "src/components/Footer/Footer";
+
+const GlobalStyle = createGlobalStyle`
+	* {
+		box-sizing: border-box;
+	}
+
+	body {
+		margin: 0px;
+	}	
+`;
+
+const Container = styled.div`
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+`;
+
+const Content = styled.main`
+  flex-grow: 1;
+`;
 
 const App = () => {
   return (
-    <div>
+    <Container>
+      <GlobalStyle />
       <Navbar />
-      <Router />
+      <Content>
+        <Router />
+      </Content>
       <Footer />
-    </div>
+    </Container>
   );
 };
 
