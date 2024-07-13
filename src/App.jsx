@@ -11,6 +11,11 @@ const GlobalStyle = createGlobalStyle`
 	body {
 		margin: 0px;
 	}	
+	
+	a {
+		color: inherit;
+		text-decoration: none;
+	}
 `;
 
 const Container = styled.div`

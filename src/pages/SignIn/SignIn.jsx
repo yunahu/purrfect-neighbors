@@ -37,6 +37,7 @@ const GoogleButton = styled.button`
   position: relative;
   justify-content: center;
   font-size: 18px;
+  cursor: pointer;
 `;
 
 const Logo = styled.img`
@@ -45,16 +46,18 @@ const Logo = styled.img`
 `;
 
 const SignIn = () => {
+  const signInWithGoogle = () => {
+    window.open("http://localhost:3000/login/federated/google", "_self");
+  };
+
   return (
     <Container>
       <Card>
         <StyledDiv>PurrFect Neighbors</StyledDiv>
-        <Link to="/">
-          <GoogleButton>
-            <Logo src={logo} />
-            Sign In With Google
-          </GoogleButton>
-        </Link>
+        <GoogleButton onClick={signInWithGoogle}>
+          <Logo src={logo} />
+          Sign In With Google
+        </GoogleButton>
       </Card>
     </Container>
   );
