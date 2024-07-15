@@ -2,6 +2,8 @@
 
 CPSC-2650-M01 Full Stack Web Development II Final Project
 
+Please see the [**project proposal**](docs/project-proposal.md) for more details.
+
 ## Team Ushuaia
 
 - Yujie Peng
