@@ -1,6 +1,6 @@
-import styled from "styled-components";
-import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import styled from "styled-components";
 
 const Container = styled.div`
   height: 80px;
@@ -40,7 +40,7 @@ const Navbar = () => {
   useEffect(() => {
     const run = async () => {
       const response = await fetch("http://localhost:3000/user", {
-        credentials: "include",
+        credentials: "include"
       });
       if (response.status === 200) {
         const resp = await response.json();
@@ -53,7 +53,7 @@ const Navbar = () => {
 
   const logout = async () => {
     const response = await fetch("http://localhost:3000/logout", {
-      credentials: "include",
+      credentials: "include"
     });
     setUser(null);
   };

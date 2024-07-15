@@ -1,5 +1,5 @@
-import styled from "styled-components";
 import SampleCard from "src/pages/Home/components/SampleCard/SampleCard";
+import styled from "styled-components";
 
 const Container = styled.div`
   height: 100%;

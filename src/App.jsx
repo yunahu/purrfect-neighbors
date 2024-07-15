@@ -1,7 +1,7 @@
-import styled, { createGlobalStyle } from "styled-components";
+import Footer from "src/components/Footer/Footer";
 import Navbar from "src/components/Navbar/Navbar";
 import Router from "src/Router/Router";
-import Footer from "src/components/Footer/Footer";
+import styled, { createGlobalStyle } from "styled-components";
 
 const GlobalStyle = createGlobalStyle`
 	* {
