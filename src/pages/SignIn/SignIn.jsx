@@ -1,6 +1,6 @@
-import styled from "styled-components";
-import logo from "src/assets/images/googleLogo.svg";
 import { Link } from "react-router-dom";
+import logo from "src/assets/images/googleLogo.svg";
+import styled from "styled-components";
 
 const Container = styled.div`
   height: 100%;
