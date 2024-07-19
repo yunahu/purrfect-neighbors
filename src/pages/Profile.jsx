@@ -1,18 +1,15 @@
-import { ConfigProvider, Divider, Tabs } from "antd";
+import { Avatar, Button, Divider, Space, Tabs, Typography } from "antd";
 import { useState } from "react";
 import { LuChevronLeft } from "react-icons/lu";
 import styled from "styled-components";
 
-import Button from "../components/Button";
 import ContentBox from "../components/ContentBox";
-import Heading from "../components/Heading";
-import Row from "../components/Row";
 
-const Avatar = styled.img`
-  width: 80px;
-  height: auto;
-  border-radius: var(--border-radius-full);
-  border: 8px solid var(--color-brand-50);
+const { Title } = Typography;
+
+const StyledAvatar = styled(Avatar)`
+  background-color: var(--color-brand-50);
+  color: var(--color-brand-100);
 `;
 
 const Item = styled.div`
@@ -25,6 +22,7 @@ const Item = styled.div`
 
 function Profile() {
   const [username, setUsername] = useState("Username");
+  const [editName, setEditName] = useState(username);
   const [isEditing, setIsEditing] = useState(false);
 
   // Static data for testing, replace with real data from API
@@ -36,7 +34,7 @@ function Profile() {
   const posts = postsData.map((post, i) => (
     <li key={post.key}>
       <Item>
-        <Heading as="h3">{post.title}</Heading>
+        <Title level={3}>{post.title}</Title>
         <p>{post.content}</p>
       </Item>
       {i < postsData.length - 1 && <Divider />}
@@ -53,55 +51,45 @@ function Profile() {
   };
 
   const handleSave = () => {
+    if (editName.trim() === "") {
+      setEditName(username);
+    } else {
+      setUsername(editName);
+    }
     setIsEditing(false);
   };
 
   const handleChange = (e) => {
-    setUsername(e.target.value);
+    setEditName(e.target.value);
   };
 
   return (
     <>
-      <Row>
+      <Space size="middle">
         <Button>
           <LuChevronLeft />
-          Back
         </Button>
-        <Heading as="h1">Profile</Heading>
-      </Row>
+        <Title level={1}>User Profile</Title>
+      </Space>
       <ContentBox>
-        <Row>
-          <Avatar
-            src="https://cdn.jsdelivr.net/gh/alohe/memojis/png/vibrent_1.png"
-            alt="User avatar"
-          />
+        <Space size="middle">
+          <StyledAvatar>{username.at(0).toUpperCase()}</StyledAvatar>
           {isEditing ? (
             <input
               type="text"
-              value={username}
+              value={editName}
               onChange={handleChange}
               onBlur={handleSave}
               autoFocus
             />
           ) : (
             <>
-              <Heading as="h2">{username}</Heading>
-              <Button size="small" onClick={handleEdit}>
-                Edit
-              </Button>
+              <Title level={2}>{editName}</Title>
+              <Button onClick={handleEdit}>Edit</Button>
             </>
           )}
-        </Row>
-        <ConfigProvider
-          theme={{
-            token: {
-              colorPrimary: "#f56b40",
-              colorPrimaryBorder: "#ffd0c3"
-            }
-          }}
-        >
-          <Tabs defaultActiveKey="1" items={items} />
-        </ConfigProvider>
+        </Space>
+        <Tabs defaultActiveKey="1" items={items} />
       </ContentBox>
     </>
   );
