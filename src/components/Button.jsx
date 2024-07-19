@@ -25,9 +25,9 @@ const variations = {
     }
   `,
   secondary: css`
-    color: ${(props) => props.theme.darkGrey};
+    color: var(--color-brand-100);
     background: #fff;
-    border: 1px solid ${(props) => props.theme.darkGrey};
+    border: 2px solid var(--color-brand-50);
 
     &:hover {
       background-color: var(--color-grey-50);
