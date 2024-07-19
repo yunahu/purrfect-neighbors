@@ -82,21 +82,19 @@ const GlobalStyles = createGlobalStyle`
     --image-opacity: 90%;
   }
 
-  /* Indigo */
-  --color-brand-50: #eef2ff;
-  --color-brand-100: #e0e7ff;
-  --color-brand-200: #c7d2fe;
-  --color-brand-500: #6366f1;
-  --color-brand-600: #4f46e5;
-  --color-brand-700: #4338ca;
-  --color-brand-800: #3730a3;
-  --color-brand-900: #312e81;
+  /* Brand Kit */
+  --color-brand-50: #ffd0c3;
+  --color-brand-100: #f56b40;
+  --color-brand-200: #f24510;
+  --color-brand-500: #e31105;
+  --color-brand-700: #c4360b;
 
   /* Border */
   --border-radius-tiny: 3px;
   --border-radius-sm: 5px;
   --border-radius-md: 7px;
-  --border-radius-lg: 9px;
+  --border-radius-lg: 30px;
+  --border-radius-full: 9999px;
 }
 
 *,
@@ -150,7 +148,7 @@ input:focus,
 button:focus,
 textarea:focus,
 select:focus {
-  outline: 2px solid var(--color-brand-600);
+  outline: 2px solid var(--color-brand-100);
   outline-offset: -1px;
 }
 
