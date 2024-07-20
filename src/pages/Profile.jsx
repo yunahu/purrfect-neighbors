@@ -1,8 +1,8 @@
 import { Avatar, Button, Divider, Space, Tabs, Typography } from "antd";
 import { useState } from "react";
-import { LuChevronLeft } from "react-icons/lu";
 import styled from "styled-components";
 
+import Back from "../components/Back";
 import ContentBox from "../components/ContentBox";
 
 const { Title } = Typography;
@@ -10,6 +10,9 @@ const { Title } = Typography;
 const StyledAvatar = styled(Avatar)`
   background-color: var(--color-brand-50);
   color: var(--color-brand-100);
+  font-size: 28px;
+  height: 56px;
+  width: 56px;
 `;
 
 const Item = styled.div`
@@ -66,9 +69,7 @@ function Profile() {
   return (
     <>
       <Space size="middle">
-        <Button>
-          <LuChevronLeft />
-        </Button>
+        <Back />
         <Title level={1}>User Profile</Title>
       </Space>
       <ContentBox>
@@ -85,7 +86,9 @@ function Profile() {
           ) : (
             <>
               <Title level={2}>{editName}</Title>
-              <Button onClick={handleEdit}>Edit</Button>
+              <Button shape="round" onClick={handleEdit}>
+                Edit
+              </Button>
             </>
           )}
         </Space>

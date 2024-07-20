@@ -1,6 +1,6 @@
-import { Button, Divider, Space, Tabs, Typography } from "antd";
-import { LuChevronLeft } from "react-icons/lu";
+import { Divider, Space, Tabs, Typography } from "antd";
 
+import Back from "../components/Back";
 import ContentBox from "../components/ContentBox";
 
 const { Title } = Typography;
@@ -26,9 +26,7 @@ function Notifications() {
   return (
     <>
       <Space size="middle">
-        <Button>
-          <LuChevronLeft />
-        </Button>
+        <Back />
         <Title level={1}>Notifications</Title>
       </Space>
       <ContentBox>
