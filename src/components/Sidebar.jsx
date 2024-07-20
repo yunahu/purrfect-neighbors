@@ -65,7 +65,7 @@ function Sidebar() {
           <li>
             <StyledNavLink to="/explore">
               <LuCat />
-              <span>Exporle</span>
+              <span>Explore</span>
             </StyledNavLink>
           </li>
           <li>

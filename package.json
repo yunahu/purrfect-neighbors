@@ -16,6 +16,7 @@
   "author": "Yujie Peng, Shushama Tahsin, Yuna Hu",
   "dependencies": {
     "antd": "^5.18.3",
+    "mapbox-gl": "^3.5.2",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-helmet": "^6.1.0",

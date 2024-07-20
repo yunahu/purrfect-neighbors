@@ -17,8 +17,10 @@ const StyledAppLayout = styled.div`
 `;
 
 const Main = styled.main`
+  grid-area: main;
   padding: 4rem 4.8rem 6.4rem;
   background-color: ${(props) => props.theme.lightGrey};
+  overflow: auto;
 `;
 
 const Container = styled.div`
@@ -27,6 +29,7 @@ const Container = styled.div`
   display: flex;
   flex-direction: column;
   gap: 3.2rem;
+  height: 100%;
 `;
 
 function AppLayout() {
