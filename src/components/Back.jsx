@@ -1,13 +1,15 @@
 import { Button } from "antd";
 import { LuChevronLeft } from "react-icons/lu";
+import { useNavigate } from "react-router-dom";
 
-function Back({ onClick }) {
+function Back() {
+  const navigate = useNavigate();
   return (
     <Button
       shape="round"
       size="large"
       icon={<LuChevronLeft style={{ verticalAlign: "middle" }} />}
-      onClick={onClick}
+      onClick={() => navigate(-1)}
     >
       Back
     </Button>
