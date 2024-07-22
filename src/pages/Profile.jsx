@@ -2,7 +2,6 @@ import { Avatar, Button, Divider, Space, Tabs, Typography } from "antd";
 import { useState } from "react";
 import styled from "styled-components";
 
-import Back from "../components/Back";
 import ContentBox from "../components/ContentBox";
 
 const { Title } = Typography;
@@ -68,10 +67,7 @@ function Profile() {
 
   return (
     <>
-      <Space size="middle">
-        <Back />
-        <Title level={1}>User Profile</Title>
-      </Space>
+      <Title level={1}>User Profile</Title>
       <ContentBox>
         <Space size="middle">
           <StyledAvatar>{username.at(0).toUpperCase()}</StyledAvatar>
