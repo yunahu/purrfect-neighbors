@@ -6,7 +6,7 @@ import DMs from "../components/DMs";
 const { Title } = Typography;
 const { TabPane } = Tabs;
 
-function Notifications() {
+function Messages() {
   const commentsData = [
     { key: "1", title: "Comment 1", content: "Content of Comment 1" },
     { key: "2", title: "Comment 2", content: "Content of Comment 2" }
@@ -23,7 +23,7 @@ function Notifications() {
 
   return (
     <>
-      <Title level={1}>Notifications</Title>
+      <Title level={1}>Messages</Title>
       <ContentBox>
         <Tabs defaultActiveKey="1">
           <TabPane tab={<Badge count={0}>Direct messages</Badge>} key="1">
@@ -41,4 +41,4 @@ function Notifications() {
   );
 }
 
-export default Notifications;
+export default Messages;

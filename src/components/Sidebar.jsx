@@ -1,3 +1,4 @@
+import { Badge } from "antd";
 import { LuBellRing, LuCat, LuGift, LuUserCircle2 } from "react-icons/lu";
 import { NavLink } from "react-router-dom";
 import styled from "styled-components";
@@ -75,9 +76,11 @@ function Sidebar() {
             </StyledNavLink>
           </li>
           <li>
-            <StyledNavLink to="/notifications">
+            <StyledNavLink to="/messages">
               <LuBellRing />
-              <span>Notifications</span>
+              <Badge count={3} offset={[10, 0]}>
+                <span>Messages</span>
+              </Badge>
             </StyledNavLink>
           </li>
           <li>
