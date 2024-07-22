@@ -1,6 +1,7 @@
 import { Badge, Divider, Tabs, Typography } from "antd";
 
 import ContentBox from "../components/ContentBox";
+import DMs from "../components/DMs";
 
 const { Title } = Typography;
 const { TabPane } = Tabs;
@@ -26,7 +27,7 @@ function Notifications() {
       <ContentBox>
         <Tabs defaultActiveKey="1">
           <TabPane tab={<Badge count={0}>Direct messages</Badge>} key="1">
-            <p>No messages</p>
+            <DMs />
           </TabPane>
           <TabPane
             tab={<Badge dot={commentsData.length > 0}>Comments</Badge>}
