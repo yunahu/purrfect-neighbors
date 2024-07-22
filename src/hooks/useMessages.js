@@ -1,37 +1,63 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { gql, useMutation, useQuery } from "@apollo/client";
 
-import {
-  fetchMessages,
-  markAsRead,
-  updateMessages
-} from "../services/apiMessages";
+const GET_MESSAGES = gql`
+  query GetMessages {
+    messages {
+      user
+      messages {
+        sender
+        content
+        sendTime
+        read
+      }
+    }
+  }
+`;
+
+const MARK_AS_READ = gql`
+  mutation ($chatIndex: Int!) {
+    markAsRead(chatIndex: $chatIndex) {
+      user
+      messages {
+        sender
+        content
+        sendTime
+        read
+      }
+    }
+  }
+`;
+
+const UPDATE_MESSAGES = gql`
+  mutation ($chatIndex: Int!, $inputValue: String!) {
+    updateMessages(chatIndex: $chatIndex, inputValue: $inputValue) {
+      user
+      messages {
+        sender
+        content
+        sendTime
+        read
+      }
+    }
+  }
+`;
 
 export function useMessages() {
-  const queryClient = useQueryClient();
-  const { data: messages, isLoading } = useQuery({
-    queryKey: ["messages"],
-    queryFn: fetchMessages
+  const { data, loading, error } = useQuery(GET_MESSAGES);
+  const [markAsRead] = useMutation(MARK_AS_READ, {
+    refetchQueries: [{ query: GET_MESSAGES }]
+  });
+  const [updateMessages] = useMutation(UPDATE_MESSAGES, {
+    refetchQueries: [{ query: GET_MESSAGES }]
   });
 
-  const { mutate: markAsReadMutation } = useMutation({
-    mutationFn: (chatIndex) => markAsRead(chatIndex),
-    onSuccess: () => {
-      queryClient.invalidateQueries(["messages"]);
-    }
-  });
-
-  const { mutate: updateMessagesMutation } = useMutation({
-    mutationFn: ({ chatIndex, inputValue }) =>
-      updateMessages(chatIndex, inputValue),
-    onSuccess: () => {
-      queryClient.invalidateQueries(["messages"]);
-    }
-  });
+  const messages = data?.messages || [];
 
   return {
     messages,
-    isLoading,
-    markAsReadMutation,
-    updateMessagesMutation
+    loading,
+    error,
+    markAsRead,
+    updateMessages
   };
 }

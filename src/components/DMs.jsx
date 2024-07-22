@@ -1,5 +1,5 @@
 import { Avatar, Badge, Button, Input, List } from "antd";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 
 import { useMessages } from "../hooks/useMessages";
@@ -64,36 +64,49 @@ const InputContainer = styled.div`
 `;
 
 function DMs() {
-  const {
-    messages,
-    markAsReadMutation: markAsRead,
-    updateMessagesMutation: updateMessages
-  } = useMessages();
+  const { messages, loading, error, markAsRead, updateMessages } =
+    useMessages();
 
   const [currentChat, setCurrentChat] = useState(0);
   const [inputValue, setInputValue] = useState("");
+  const newestMessage = useRef(null);
 
   const handleUserClick = (index) => {
     setCurrentChat(index);
-    markAsRead(index);
+    markAsRead({ variables: { chatIndex: index } });
   };
 
   const handleSendMsg = async () => {
     if (inputValue.trim() === "") return;
-    console.log(currentChat, inputValue);
-    await updateMessages({ chatIndex: currentChat, inputValue });
-    setInputValue("");
+    // console.log(currentChat, inputValue);
+    try {
+      await updateMessages({
+        variables: { chatIndex: currentChat, inputValue }
+      });
+      setInputValue("");
+    } catch (error) {
+      console.error("Error sending message:", error);
+    }
   };
 
   const countUnread = (chat) => {
     return chat.messages.filter((msg) => !msg.read).length;
   };
 
+  const scrollToBottom = () => {
+    newestMessage.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
   useEffect(() => {
     if (messages && messages[currentChat]) {
-      markAsRead(currentChat);
+      scrollToBottom();
+      markAsRead({ variables: { chatIndex: currentChat } });
     }
   }, [currentChat, messages, markAsRead]);
+
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>Error: {error.message}</p>;
+  if (!messages || messages.length === 0) return <p>No messages found</p>;
 
   return (
     <Layout>
@@ -121,8 +134,15 @@ function DMs() {
         <MessageList
           itemLayout="horizontal"
           dataSource={messages[currentChat].messages}
-          renderItem={(message) => (
-            <List.Item>
+          renderItem={(message, index) => (
+            <List.Item
+              key={index}
+              ref={
+                index === messages[currentChat].messages.length - 1
+                  ? newestMessage
+                  : null
+              }
+            >
               <List.Item.Meta
                 title={message.sender}
                 description={message.content}
