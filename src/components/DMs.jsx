@@ -1,6 +1,8 @@
-import { Avatar, Button, Input, List } from "antd";
-import { useState } from "react";
+import { Avatar, Badge, Button, Input, List } from "antd";
+import { useEffect, useState } from "react";
 import styled from "styled-components";
+
+import { useMessages } from "../hooks/useMessages";
 
 const { TextArea } = Input;
 
@@ -62,66 +64,36 @@ const InputContainer = styled.div`
 `;
 
 function DMs() {
-  const [messages, setMessages] = useState([
-    {
-      user: "User 1",
-      messages: [
-        {
-          sender: "User 1",
-          content: "Message 1",
-          sendTime: "2024-01-01T10:00:00Z"
-        },
-        {
-          sender: "Me",
-          content: "Message 2",
-          sendTime: "2024-01-01T10:01:00Z"
-        },
-        {
-          sender: "User 1",
-          content: "Message 3",
-          sendTime: "2024-01-01T10:02:00Z"
-        }
-      ]
-    },
-    {
-      user: "User 2",
-      messages: [
-        {
-          sender: "User 2",
-          content: "Message 1",
-          sendTime: "2024-01-01T10:00:00Z"
-        },
-        {
-          sender: "Me",
-          content: "Message 2",
-          sendTime: "2024-01-01T10:01:00Z"
-        },
-        {
-          sender: "User 2",
-          content: "Message 3",
-          sendTime: "2024-01-01T10:02:00Z"
-        }
-      ]
-    }
-  ]);
+  const {
+    messages,
+    markAsReadMutation: markAsRead,
+    updateMessagesMutation: updateMessages
+  } = useMessages();
+
   const [currentChat, setCurrentChat] = useState(0);
   const [inputValue, setInputValue] = useState("");
 
   const handleUserClick = (index) => {
     setCurrentChat(index);
+    markAsRead(index);
   };
 
-  const handleSendMsg = () => {
+  const handleSendMsg = async () => {
     if (inputValue.trim() === "") return;
-    const newMessages = [...messages];
-    newMessages[currentChat].messages.push({
-      sender: "Me",
-      content: inputValue,
-      sendTime: new Date().toISOString()
-    });
-    setMessages(newMessages);
+    console.log(currentChat, inputValue);
+    await updateMessages({ chatIndex: currentChat, inputValue });
     setInputValue("");
   };
+
+  const countUnread = (chat) => {
+    return chat.messages.filter((msg) => !msg.read).length;
+  };
+
+  useEffect(() => {
+    if (messages && messages[currentChat]) {
+      markAsRead(currentChat);
+    }
+  }, [currentChat, messages, markAsRead]);
 
   return (
     <Layout>
@@ -134,7 +106,13 @@ function DMs() {
               onClick={() => handleUserClick(index)}
             >
               <Avatar size="small">{message.user[0]}</Avatar>
-              <span>{message.user}</span>
+              {countUnread(message) > 0 ? (
+                <Badge count={countUnread(message)} offset={[10, 0]}>
+                  <span>{message.user}</span>
+                </Badge>
+              ) : (
+                <span>{message.user}</span>
+              )}
             </User>
           ))}
         </UserList>

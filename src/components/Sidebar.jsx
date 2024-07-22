@@ -3,6 +3,7 @@ import { LuBellRing, LuCat, LuGift, LuUserCircle2 } from "react-icons/lu";
 import { NavLink } from "react-router-dom";
 import styled from "styled-components";
 
+import { useMessages } from "../hooks/useMessages";
 import Logo from "./Logo";
 
 const NavList = styled.ul`
@@ -58,6 +59,12 @@ const StyledSidebar = styled.aside`
 `;
 
 function Sidebar() {
+  const { messages } = useMessages();
+
+  const unreadMessages = messages?.reduce((acc, chat) => {
+    return acc + chat.messages.filter((msg) => !msg.read).length;
+  }, 0);
+
   return (
     <StyledSidebar>
       <Logo />
@@ -78,7 +85,10 @@ function Sidebar() {
           <li>
             <StyledNavLink to="/messages">
               <LuBellRing />
-              <Badge count={3} offset={[10, 0]}>
+              <Badge
+                count={unreadMessages > 0 ? unreadMessages : undefined}
+                offset={[10, 0]}
+              >
                 <span>Messages</span>
               </Badge>
             </StyledNavLink>
