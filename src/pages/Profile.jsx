@@ -1,18 +1,11 @@
-import { Avatar, Button, Divider, Space, Tabs, Typography } from "antd";
+import { Button, Divider, Space, Tabs, Typography } from "antd";
 import { useState } from "react";
 import styled from "styled-components";
 
 import ContentBox from "../components/ContentBox";
+import UserAvatar from "../components/UserAvatar";
 
 const { Title } = Typography;
-
-const StyledAvatar = styled(Avatar)`
-  background-color: var(--color-brand-50);
-  color: var(--color-brand-100);
-  font-size: 28px;
-  height: 56px;
-  width: 56px;
-`;
 
 const Item = styled.div`
   padding: 8px;
@@ -70,7 +63,7 @@ function Profile() {
       <Title level={1}>User Profile</Title>
       <ContentBox>
         <Space size="middle">
-          <StyledAvatar>{username.at(0).toUpperCase()}</StyledAvatar>
+          <UserAvatar name={username} size={64} />
           {isEditing ? (
             <input
               type="text"

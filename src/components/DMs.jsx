@@ -1,8 +1,9 @@
-import { Avatar, Badge, Button, Input, List } from "antd";
+import { Badge, Button, Input, List } from "antd";
 import { useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 
 import { useMessages } from "../hooks/useMessages";
+import UserAvatar from "./UserAvatar";
 
 const { TextArea } = Input;
 
@@ -83,6 +84,7 @@ function DMs() {
       await updateMessages({
         variables: { chatIndex: currentChat, inputValue }
       });
+      newestMessage.current?.scrollIntoView({ behavior: "smooth" });
       setInputValue("");
     } catch (error) {
       console.error("Error sending message:", error);
@@ -118,7 +120,7 @@ function DMs() {
               className={currentChat === index ? "active" : ""}
               onClick={() => handleUserClick(index)}
             >
-              <Avatar size="small">{message.user[0]}</Avatar>
+              <UserAvatar size="small" name={message.user} gap={6} />
               {countUnread(message) > 0 ? (
                 <Badge count={countUnread(message)} offset={[10, 0]}>
                   <span>{message.user}</span>
@@ -154,6 +156,9 @@ function DMs() {
           <TextArea
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
+            onKeyDown={(e) =>
+              e.key === "Enter" && !e.shiftKey && handleSendMsg()
+            }
             placeholder="Type a message..."
             autoSize
           />
