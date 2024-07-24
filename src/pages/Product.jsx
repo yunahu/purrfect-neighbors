@@ -1,12 +1,4 @@
-import {
-  Avatar,
-  Button,
-  Divider,
-  Input,
-  Space,
-  Tooltip,
-  Typography
-} from "antd";
+import { Button, Divider, Input, Space, Tooltip, Typography } from "antd";
 import { formatDistanceToNow, parseISO } from "date-fns";
 import { useState } from "react";
 import { LuArrowUp, LuMapPin } from "react-icons/lu";
@@ -15,6 +7,7 @@ import styled from "styled-components";
 
 import Back from "../components/Back";
 import ContentBox from "../components/ContentBox";
+import UserAvatar from "../components/UserAvatar";
 
 const { Title, Text } = Typography;
 
@@ -23,6 +16,7 @@ const Comment = styled.div`
   padding: 8px;
   display: grid;
   grid-template-columns: 3.2rem 1fr;
+  gap: 1rem;
   &:hover {
     background-color: var(--color-grey-100);
   }
@@ -90,7 +84,7 @@ function Product() {
             {id}: {title}
           </Title>
           <Space>
-            <Avatar size="large">{postBy.at(0).toUpperCase()}</Avatar>
+            <UserAvatar size="large" name={postBy} />
             <Title level={5}>{postBy}</Title>
             <Text type="secondary">{timeAgo(postDate)}</Text>
           </Space>
@@ -120,9 +114,7 @@ function Product() {
             <>
               <Divider style={{ margin: "12px 0" }} />
               <Comment key={comment.commentDate}>
-                <Avatar size="small">
-                  {comment.commentBy.at(0).toUpperCase()}
-                </Avatar>
+                <UserAvatar name={comment.commentBy} gap={8} />
                 <Space direction="vertical">
                   <Space>
                     <Text>{comment.commentBy}</Text>

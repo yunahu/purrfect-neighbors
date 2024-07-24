@@ -1,6 +1,9 @@
-import { Avatar, Button, Input, List } from "antd";
-import { useState } from "react";
+import { Badge, Button, Input, List } from "antd";
+import { useEffect, useRef, useState } from "react";
 import styled from "styled-components";
+
+import { useMessages } from "../hooks/useMessages";
+import UserAvatar from "./UserAvatar";
 
 const { TextArea } = Input;
 
@@ -62,66 +65,50 @@ const InputContainer = styled.div`
 `;
 
 function DMs() {
-  const [messages, setMessages] = useState([
-    {
-      user: "User 1",
-      messages: [
-        {
-          sender: "User 1",
-          content: "Message 1",
-          sendTime: "2024-01-01T10:00:00Z"
-        },
-        {
-          sender: "Me",
-          content: "Message 2",
-          sendTime: "2024-01-01T10:01:00Z"
-        },
-        {
-          sender: "User 1",
-          content: "Message 3",
-          sendTime: "2024-01-01T10:02:00Z"
-        }
-      ]
-    },
-    {
-      user: "User 2",
-      messages: [
-        {
-          sender: "User 2",
-          content: "Message 1",
-          sendTime: "2024-01-01T10:00:00Z"
-        },
-        {
-          sender: "Me",
-          content: "Message 2",
-          sendTime: "2024-01-01T10:01:00Z"
-        },
-        {
-          sender: "User 2",
-          content: "Message 3",
-          sendTime: "2024-01-01T10:02:00Z"
-        }
-      ]
-    }
-  ]);
+  const { messages, loading, error, markAsRead, updateMessages } =
+    useMessages();
+
   const [currentChat, setCurrentChat] = useState(0);
   const [inputValue, setInputValue] = useState("");
+  const newestMessage = useRef(null);
 
   const handleUserClick = (index) => {
     setCurrentChat(index);
+    markAsRead({ variables: { chatIndex: index } });
   };
 
-  const handleSendMsg = () => {
+  const handleSendMsg = async () => {
     if (inputValue.trim() === "") return;
-    const newMessages = [...messages];
-    newMessages[currentChat].messages.push({
-      sender: "Me",
-      content: inputValue,
-      sendTime: new Date().toISOString()
-    });
-    setMessages(newMessages);
-    setInputValue("");
+    // console.log(currentChat, inputValue);
+    try {
+      await updateMessages({
+        variables: { chatIndex: currentChat, inputValue }
+      });
+      newestMessage.current?.scrollIntoView({ behavior: "smooth" });
+      setInputValue("");
+    } catch (error) {
+      console.error("Error sending message:", error);
+    }
   };
+
+  const countUnread = (chat) => {
+    return chat.messages.filter((msg) => !msg.read).length;
+  };
+
+  const scrollToBottom = () => {
+    newestMessage.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    if (messages && messages[currentChat]) {
+      scrollToBottom();
+      markAsRead({ variables: { chatIndex: currentChat } });
+    }
+  }, [currentChat, messages, markAsRead]);
+
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>Error: {error.message}</p>;
+  if (!messages || messages.length === 0) return <p>No messages found</p>;
 
   return (
     <Layout>
@@ -133,8 +120,14 @@ function DMs() {
               className={currentChat === index ? "active" : ""}
               onClick={() => handleUserClick(index)}
             >
-              <Avatar size="small">{message.user[0]}</Avatar>
-              <span>{message.user}</span>
+              <UserAvatar size="small" name={message.user} gap={6} />
+              {countUnread(message) > 0 ? (
+                <Badge count={countUnread(message)} offset={[10, 0]}>
+                  <span>{message.user}</span>
+                </Badge>
+              ) : (
+                <span>{message.user}</span>
+              )}
             </User>
           ))}
         </UserList>
@@ -143,8 +136,15 @@ function DMs() {
         <MessageList
           itemLayout="horizontal"
           dataSource={messages[currentChat].messages}
-          renderItem={(message) => (
-            <List.Item>
+          renderItem={(message, index) => (
+            <List.Item
+              key={index}
+              ref={
+                index === messages[currentChat].messages.length - 1
+                  ? newestMessage
+                  : null
+              }
+            >
               <List.Item.Meta
                 title={message.sender}
                 description={message.content}
@@ -156,6 +156,9 @@ function DMs() {
           <TextArea
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
+            onKeyDown={(e) =>
+              e.key === "Enter" && !e.shiftKey && handleSendMsg()
+            }
             placeholder="Type a message..."
             autoSize
           />
