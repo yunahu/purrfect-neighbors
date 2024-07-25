@@ -1,4 +1,4 @@
-import { Outlet } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
 import styled from "styled-components";
 
 import Footer from "./Footer/Footer";
@@ -17,14 +17,13 @@ const StyledAppLayout = styled.div`
 `;
 
 const Main = styled.main`
-  grid-area: main;
-  padding: 4rem 4.8rem 6.4rem;
+  padding: ${(props) => (props.noPadding ? "0" : "4rem 4.8rem 6.4rem")};
   background-color: ${(props) => props.theme.lightGrey};
   overflow: auto;
 `;
 
 const Container = styled.div`
-  max-width: 120rem;
+  max-width: ${(props) => (props.noMaxWidth ? "100%" : "120rem")};
   margin: 0 auto;
   display: flex;
   flex-direction: column;
@@ -33,12 +32,15 @@ const Container = styled.div`
 `;
 
 function AppLayout() {
+  const location = useLocation();
+  const isHome = location.pathname === "/explore";
+
   return (
     <StyledAppLayout>
       <Navbar />
       <Sidebar />
-      <Main>
-        <Container>
+      <Main noPadding={isHome}>
+        <Container noMaxWidth={isHome}>
           <Outlet />
         </Container>
       </Main>
