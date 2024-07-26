@@ -3,7 +3,6 @@ import React, { useState } from "react";
 import { Button, Flex, Form, Input, Space, Tooltip, Typography, message } from "antd";
 import { LuMapPin } from "react-icons/lu";
 
-import Back from "../components/Back";
 import ContentBox from "../components/ContentBox";
 
 const { Title } = Typography;
@@ -62,10 +61,7 @@ function ShareItems() {
 
   return (
     <>
-      <Space size="middle">
-        <Back />
-        <Title level={1}>Share Items</Title>
-      </Space>
+      <Title level={1}>Share Items</Title>
       <ContentBox>
         <Form form={form} onFinish={onFinish}>
           <Form.Item

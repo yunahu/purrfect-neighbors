@@ -1,20 +1,13 @@
-import {
-  Avatar,
-  Button,
-  Divider,
-  Input,
-  Space,
-  Tooltip,
-  Typography
-} from "antd";
+import { Button, Divider, Input, Space, Tooltip, Typography, message } from "antd";
 import { formatDistanceToNow, parseISO } from "date-fns";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { LuArrowUp, LuMapPin } from "react-icons/lu";
 import { useParams } from "react-router-dom";
 import styled from "styled-components";
 
 import Back from "../components/Back";
 import ContentBox from "../components/ContentBox";
+import UserAvatar from "../components/UserAvatar";
 
 const { Title, Text } = Typography;
 
@@ -23,6 +16,7 @@ const Comment = styled.div`
   padding: 8px;
   display: grid;
   grid-template-columns: 3.2rem 1fr;
+  gap: 1rem;
   &:hover {
     background-color: var(--color-grey-100);
   }
@@ -54,6 +48,23 @@ function Product() {
     ]
   });
 
+  useEffect(() => {
+    const fetchPost = async () => {
+      try {
+        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/donations/${id}`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch post');
+        }
+        const data = await response.json();
+        setPost(data);
+      } catch (error) {
+        message.error("Failed to load post.");
+      }
+    };
+
+    fetchPost();
+  }, [id]);
+
   const { title, description, postBy, postDate, location, comments } = post;
 
   const timeAgo = (date) => {
@@ -63,19 +74,36 @@ function Product() {
     });
   };
 
-  const handleSubmitComment = () => {
-    setPost({
-      ...post,
-      comments: [
-        ...comments,
-        {
+  const handleSubmitComment = async () => {
+    try {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/donations/${id}/comments`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        credentials: "include",
+        body: JSON.stringify({ content: comment })
+      });
+
+      if (response.ok) {
+        const newComment = {
           commentBy: currentUser,
           commentDate: new Date().toISOString(),
           content: comment
-        }
-      ]
-    });
-    setComment("");
+        };
+
+        setPost({
+          ...post,
+          comments: [...comments, newComment]
+        });
+        setComment("");
+        message.success("Comment submitted successfully!");
+      } else {
+        message.error("Failed to submit comment.");
+      }
+    } catch (error) {
+      message.error("An error occurred. Please try again.");
+    }
   };
 
   return (
@@ -90,7 +118,7 @@ function Product() {
             {id}: {title}
           </Title>
           <Space>
-            <Avatar size="large">{postBy.at(0).toUpperCase()}</Avatar>
+            <UserAvatar size="large" name={postBy} />
             <Title level={5}>{postBy}</Title>
             <Text type="secondary">{timeAgo(postDate)}</Text>
           </Space>
@@ -120,9 +148,7 @@ function Product() {
             <>
               <Divider style={{ margin: "12px 0" }} />
               <Comment key={comment.commentDate}>
-                <Avatar size="small">
-                  {comment.commentBy.at(0).toUpperCase()}
-                </Avatar>
+                <UserAvatar name={comment.commentBy} gap={8} />
                 <Space direction="vertical">
                   <Space>
                     <Text>{comment.commentBy}</Text>

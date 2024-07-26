@@ -2,12 +2,18 @@ import React, { useEffect, useRef, useState } from "react";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 
+import Popup from "../../../components/Popup"
+
 mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN;
 
 const Map = ({ latitude, longitude, radius }) => {
   const mapContainer = useRef(null);
   const map = useRef(null);
   const [posts, setPosts] = useState([]);
+
+  const [visible, setVisible] = useState(false);
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [popupContent, setPopupContent] = useState({});
 
   const fetchPosts = async () => {
     try {
@@ -38,20 +44,39 @@ const Map = ({ latitude, longitude, radius }) => {
     if (!posts.length) return;
     
     posts.forEach(post => {
-      const popupContent = document.createElement('div');
-      popupContent.innerHTML = `
-        <h3>${post.title}</h3>
-        <a href="/posts/${post.id}" style="color: blue; text-decoration:underline;">See Details</a>
-        <p>${post.content}</p>
-      `;
-      new mapboxgl.Marker()
+      const marker = new mapboxgl.Marker()
         .setLngLat([post.longitude, post.latitude])
-        .setPopup(new mapboxgl.Popup().setDOMContent(popupContent))
         .addTo(map.current);
+
+      marker.getElement().addEventListener("click", (e) => {
+        e.stopPropagation();
+        setPopupContent({
+          title: post.title,
+          description: post.content,
+          link: `/product/${post.id}`,
+        });
+        setPosition({
+          x: e.pageX,
+          y: e.pageY,
+        });
+        setVisible(true);
+      });
     });
   }, [posts]);
 
-  return <div ref={mapContainer} style={{ width: '100%', height: '100%' }} />;
+  return (
+    <>
+      <div ref={mapContainer} style={{ width: '100%', height: '100%' }} />
+      {visible && (
+        <Popup
+          open={visible}
+          onClose={() => setVisible(false)}
+          position={position}
+          content={popupContent}
+        />
+      )}
+    </>
+  );
 };
 
 export default Map;
