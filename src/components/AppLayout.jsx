@@ -17,12 +17,12 @@ const StyledAppLayout = styled.div`
 `;
 
 const Main = styled.main`
-  padding: ${(props) => (props.noPadding ? "0" : "4rem 4.8rem 6.4rem")};
-  background-color: ${(props) => props.theme.lightGrey};
+  padding: ${(props) => (props.$noPadding ? "0" : "4rem 4.8rem 6.4rem")};
+  background-color: var(--color-grey-50);
 `;
 
 const Container = styled.div`
-  max-width: ${(props) => (props.noMaxWidth ? "100%" : "120rem")};
+  max-width: ${(props) => (props.$noMaxWidth ? "100%" : "120rem")};
   margin: 0 auto;
   display: flex;
   flex-direction: column;
@@ -37,8 +37,8 @@ function AppLayout() {
     <StyledAppLayout>
       <Navbar />
       <Sidebar />
-      <Main noPadding={isHome}>
-        <Container noMaxWidth={isHome}>
+      <Main $noPadding={isHome}>
+        <Container $noMaxWidth={isHome}>
           <Outlet />
         </Container>
       </Main>

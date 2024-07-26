@@ -4,6 +4,7 @@ import styled from "styled-components";
 
 import ContentBox from "../components/ContentBox";
 import UserAvatar from "../components/UserAvatar";
+import { useAuth } from "../context/useAuth";
 
 const { Title } = Typography;
 
@@ -16,7 +17,8 @@ const Item = styled.div`
 `;
 
 function Profile() {
-  const [username, setUsername] = useState("Username");
+  const { user, updateUsername } = useAuth();
+  const username = user ? user.name : "Guest";
   const [editName, setEditName] = useState(username);
   const [isEditing, setIsEditing] = useState(false);
 
@@ -49,7 +51,7 @@ function Profile() {
     if (editName.trim() === "") {
       setEditName(username);
     } else {
-      setUsername(editName);
+      updateUsername(editName);
     }
     setIsEditing(false);
   };
