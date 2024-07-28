@@ -33,6 +33,11 @@ const Container = styled.div`
 function AppLayout() {
   const location = useLocation();
   const isHome = location.pathname === "/explore";
+  const isSignIn = location.pathname === "/signin";
+
+  if (isSignIn) {
+    return <Outlet />;
+  }
 
   return (
     <StyledAppLayout>

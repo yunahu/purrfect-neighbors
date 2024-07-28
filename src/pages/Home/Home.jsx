@@ -8,6 +8,8 @@ const Container = styled.div`
   height: 100%;
   width: 100%;
   background-color: white;
+  display: flex;
+  flex-direction: column;
 `;
 
 const StyledRadioGroup = styled(Radio.Group)`
@@ -29,13 +31,13 @@ const StyledRadioButton = styled(Radio.Button)`
     align-items: center;
     justify-content: center;
     font-weight: bold;
-    color: var(--color-brand-100);
+    color: var(--color-grey-400);
     &:hover {
-      background-color: var(--color-grey-50);
+      background-color: var(--color-grey-200);
     }
     &.ant-radio-button-wrapper-checked {
-      background-color: var(--color-grey-200);
-      color: var(--color-grey-400);
+      background-color: var(--color-brand-50);
+      color: var(--color-brand-100);
     }
   }
 `;
@@ -45,7 +47,7 @@ const Home = () => {
   const longitude = -123.1207; // Vancouver longitude
   const radius = 100;
 
-  const [selection, setSelection] = useState('products');
+  const [selection, setSelection] = useState("products");
 
   const handleChange = (e) => {
     setSelection(e.target.value);
@@ -57,7 +59,12 @@ const Home = () => {
         <StyledRadioButton value="pets">Pets</StyledRadioButton>
         <StyledRadioButton value="products">Products</StyledRadioButton>
       </StyledRadioGroup>
-      <Map latitude={latitude} longitude={longitude} radius={radius} selection={selection} />
+      <Map
+        latitude={latitude}
+        longitude={longitude}
+        radius={radius}
+        selection={selection}
+      />
     </Container>
   );
 };
