@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-import { Button, Flex, Form, Input, Space, Tooltip, Typography, message } from "antd";
+import { Button, Flex, Form, Input, Tooltip, Typography, message } from "antd";
 import { LuMapPin } from "react-icons/lu";
 
 import ContentBox from "../components/ContentBox";

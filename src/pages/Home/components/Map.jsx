@@ -6,10 +6,11 @@ import Popup from "../../../components/Popup"
 
 mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN;
 
-const Map = ({ latitude, longitude, radius }) => {
+const Map = ({ latitude, longitude, radius, selection }) => {
   const mapContainer = useRef(null);
   const map = useRef(null);
   const [posts, setPosts] = useState([]);
+  const [markers, setMarkers] = useState([]);
 
   const [visible, setVisible] = useState(false);
   const [position, setPosition] = useState({ x: 0, y: 0 });
@@ -17,9 +18,10 @@ const Map = ({ latitude, longitude, radius }) => {
 
   const fetchPosts = async () => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/donations?latitude=${latitude}&longitude=${longitude}&radius=${radius}`);
+      const endpoint = (selection == 'products') ? 'donations' : 'pets';
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/${endpoint}?latitude=${latitude}&longitude=${longitude}&radius=${radius}`);
       const data = await response.json();
-      
+      console.log(data);
       setPosts(data);
     } catch (error) {
       console.error("Error fetching posts:", error);
@@ -28,7 +30,7 @@ const Map = ({ latitude, longitude, radius }) => {
 
   useEffect(() => {
     fetchPosts();
-  }, []);
+  }, [selection]);
 
   useEffect(() => {
     if (map.current) return;
@@ -41,8 +43,11 @@ const Map = ({ latitude, longitude, radius }) => {
   });
 
   useEffect(() => {
+    markers.forEach(marker => marker.remove());
     if (!posts.length) return;
     
+    const link = (selection == 'products') ? 'product' : 'pet';
+    const newMarkers = [];
     posts.forEach(post => {
       const marker = new mapboxgl.Marker()
         .setLngLat([post.longitude, post.latitude])
@@ -50,18 +55,25 @@ const Map = ({ latitude, longitude, radius }) => {
 
       marker.getElement().addEventListener("click", (e) => {
         e.stopPropagation();
-        setPopupContent({
+        const popupContent = {
           title: post.title,
           description: post.content,
-          link: `/product/${post.id}`,
-        });
+          link: `/${link}/${post.id}`,
+        };
+        if (link == 'pet') {
+          popupContent.image = post.image;
+        }
+        setPopupContent(popupContent);
         setPosition({
           x: e.pageX,
           y: e.pageY,
         });
         setVisible(true);
       });
+
+      newMarkers.push(marker);
     });
+    setMarkers(newMarkers);
   }, [posts]);
 
   return (
