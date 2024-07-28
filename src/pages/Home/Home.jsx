@@ -1,72 +1,63 @@
-import { Button } from "antd";
+import { Radio } from "antd";
 import { useState } from "react";
-import SampleCard from "src/pages/Home/components/SampleCard/SampleCard";
 import styled from "styled-components";
 
-import Popup from "../../components/Popup";
+import Map from "./components/Map";
 
 const Container = styled.div`
   height: 100%;
+  width: 100%;
+  background-color: white;
 `;
 
-// Sample data for popup content
+const StyledRadioGroup = styled(Radio.Group)`
+  display: flex;
+  max-width: 20rem;
+  border: 3px solid #bfbfbf;
+  border-radius: 25px;
+  margin: 1rem 2rem;
+  padding: 3px;
+`;
 
-const popups = [
-  {
-    title: "Product Name",
-    link: "/product/1",
-    description:
-      "Lorem Ipsum Dolor Sit Amet, Consectetur Adipiscing Elit, Sed Do Eiusmod Tempor Incididunt Ut Labore Et Dolore Magna Aliqua."
-  },
-  {
-    image: "https://http.cat/images/200.jpg",
-    title: "Pet Name",
-    link: "/pet/1",
-    description:
-      "Lorem Ipsum Dolor Sit Amet, Consectetur Adipiscing Elit, Sed Do Eiusmod Tempor Incididunt Ut Labore Et Dolore Magna Aliqua."
-  },
-  {
-    image: "https://http.cat/images/200.jpg",
-    title: "Pet Name2",
-    link: "/pet/2",
-    description:
-      "Lorem Ipsum Dolor Sit Amet, Consectetur Adipiscing Elit, Sed Do Eiusmod Tempor Incididunt Ut Labore Et Dolore Magna Aliqua."
+const StyledRadioButton = styled(Radio.Button)`
+  && {
+    flex: 1;
+    padding: 5px 20px;
+    border: none;
+    border-radius: 25px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: var(--color-brand-100);
+    &:hover {
+      background-color: var(--color-grey-50);
+    }
+    &.ant-radio-button-wrapper-checked {
+      background-color: var(--color-grey-200);
+      color: var(--color-grey-400);
+    }
   }
-];
+`;
 
 const Home = () => {
-  const [visible, setVisible] = useState(false);
-  const [position, setPosition] = useState({ x: 0, y: 0 });
-  const [popupContent, setPopupContent] = useState({});
+  const latitude = 49.2827; // Vancouver latitude
+  const longitude = -123.1207; // Vancouver longitude
+  const radius = 100;
 
-  const handleButtonClick = (e, content) => {
-    const rect = e.target.getBoundingClientRect();
-    setPosition({
-      x: Math.min(rect.x, window.innerWidth - 300),
-      y: rect.y + rect.height + 8
-    });
-    console.log("position", position);
-    setPopupContent(content);
-    setVisible(true);
+  const [selection, setSelection] = useState('products');
+
+  const handleChange = (e) => {
+    setSelection(e.target.value);
   };
 
   return (
     <Container>
-      Home..
-      <SampleCard />
-      {popups.map((popup, index) => (
-        <Button key={index} onClick={(e) => handleButtonClick(e, popup)}>
-          Pin {index + 1}
-        </Button>
-      ))}
-      {visible && (
-        <Popup
-          open={visible}
-          onClose={() => setVisible(false)}
-          position={position}
-          content={popupContent}
-        />
-      )}
+      <StyledRadioGroup value={selection} onChange={handleChange}>
+        <StyledRadioButton value="pets">Pets</StyledRadioButton>
+        <StyledRadioButton value="products">Products</StyledRadioButton>
+      </StyledRadioGroup>
+      <Map latitude={latitude} longitude={longitude} radius={radius} selection={selection} />
     </Container>
   );
 };
