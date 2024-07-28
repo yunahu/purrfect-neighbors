@@ -4,7 +4,6 @@ import ContentBox from "../components/ContentBox";
 import DMs from "../components/DMs";
 
 const { Title } = Typography;
-const { TabPane } = Tabs;
 
 function Messages() {
   const commentsData = [
@@ -21,21 +20,24 @@ function Messages() {
     </li>
   ));
 
+  const items = [
+    {
+      key: "1",
+      label: <Badge count={0}>Direct messages</Badge>,
+      children: <DMs />
+    },
+    {
+      key: "2",
+      label: <Badge dot={commentsData.length > 0}>Comments</Badge>,
+      children: <ul>{comments}</ul>
+    }
+  ];
+
   return (
     <>
       <Title level={1}>Messages</Title>
       <ContentBox>
-        <Tabs defaultActiveKey="1">
-          <TabPane tab={<Badge count={0}>Direct messages</Badge>} key="1">
-            <DMs />
-          </TabPane>
-          <TabPane
-            tab={<Badge dot={commentsData.length > 0}>Comments</Badge>}
-            key="2"
-          >
-            <ul>{comments}</ul>
-          </TabPane>
-        </Tabs>
+        <Tabs defaultActiveKey="1" items={items} />
       </ContentBox>
     </>
   );

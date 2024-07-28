@@ -5,8 +5,8 @@ import Logo from "../Logo";
 
 const StyledFooter = styled.footer`
   height: 100px;
-  background-color: ${(props) => props.theme.lightGrey};
-  color: ${(props) => props.theme.darkGrey};
+  background-color: var(--color-grey-50);
+  color: var(--color-grey-400);
   padding: 2.4rem 0;
   text-align: center;
   display: flex;

@@ -2,12 +2,13 @@ import { Button, Divider, Input, Space, Tooltip, Typography } from "antd";
 import { formatDistanceToNow, parseISO } from "date-fns";
 import { useState } from "react";
 import { LuArrowUp, LuMapPin } from "react-icons/lu";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import styled from "styled-components";
 
 import Back from "../components/Back";
 import ContentBox from "../components/ContentBox";
 import UserAvatar from "../components/UserAvatar";
+import { useAuth } from "../context/useAuth";
 
 const { Title, Text } = Typography;
 
@@ -23,9 +24,11 @@ const Comment = styled.div`
 `;
 
 function Product() {
+  const navigate = useNavigate();
   const { id } = useParams();
+  const { user } = useAuth();
 
-  const currentUser = "Username";
+  const currentUser = user ? user.name : "Guest";
   const [comment, setComment] = useState("");
 
   const [post, setPost] = useState({
@@ -58,6 +61,11 @@ function Product() {
   };
 
   const handleSubmitComment = () => {
+    if (!user) {
+      // Can show a notification before redirecting
+      navigate(`/signin?redirectUrl=/product/${id}`);
+      return;
+    }
     setPost({
       ...post,
       comments: [
