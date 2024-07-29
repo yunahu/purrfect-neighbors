@@ -2,6 +2,7 @@ import { Link, useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
 import { useAuth } from "../../context/useAuth";
+import SearchBar from "../SearchBar";
 
 const Container = styled.div`
   height: 80px;
@@ -53,7 +54,7 @@ const Navbar = () => {
 
   return (
     <Container>
-      Search Input
+      <SearchBar />
       <User>
         <UserLink to={user ? "/profile" : "/signin"}>
           {username.toUpperCase()}
