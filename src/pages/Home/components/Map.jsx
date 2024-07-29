@@ -21,7 +21,6 @@ const Map = ({ latitude, longitude, radius, selection }) => {
       const endpoint = (selection == 'products') ? 'donations' : 'pets';
       const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/${endpoint}?latitude=${latitude}&longitude=${longitude}&radius=${radius}`);
       const data = await response.json();
-      console.log(data);
       setPosts(data);
     } catch (error) {
       console.error("Error fetching posts:", error);
@@ -49,7 +48,7 @@ const Map = ({ latitude, longitude, radius, selection }) => {
     const link = (selection == 'products') ? 'product' : 'pet';
     const newMarkers = [];
     posts.forEach(post => {
-      const marker = new mapboxgl.Marker()
+      const marker = new mapboxgl.Marker({color: 'var(--color-brand-100)'})
         .setLngLat([post.longitude, post.latitude])
         .addTo(map.current);
 
