@@ -1,7 +1,7 @@
 import { Input } from "antd";
 import { useEffect, useState } from "react";
-import { LuSearch } from "react-icons/lu";
-import { useNavigate } from "react-router-dom";
+import { LuSearch, LuXCircle } from "react-icons/lu";
+import { useLocation, useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
 import { useSearch } from "../context/useSearch";
@@ -35,8 +35,16 @@ const PopOver = styled.div`
   padding: 20px;
 `;
 
+const StyledInput = styled(Input)`
+  .ant-input-clear-icon {
+    display: flex;
+    align-items: center;
+  }
+`;
+
 function SearchBar() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { searchTerm, setSearchTerm, loading, error, pets, products } =
     useSearch();
   const [value, setValue] = useState(searchTerm);
@@ -68,13 +76,16 @@ function SearchBar() {
   const handleSearch = (e) => {
     setSearchTerm(e.target.value);
     setIsVisible(false);
+    if (location.pathname !== "/explore") {
+      navigate("/explore");
+    }
     console.log(pets, products);
   };
 
   return (
     <>
       <SearchBox>
-        <Input
+        <StyledInput
           placeholder="Seach for pets or products"
           prefix={<LuSearch color="#bfbfbf" />}
           variant="borderless"
@@ -84,7 +95,9 @@ function SearchBar() {
           onPressEnter={handleSearch}
           onFocus={(e) => setIsVisible(e.target.value !== "")}
           onBlur={handleBlur}
-          allowClear
+          allowClear={{
+            clearIcon: <LuXCircle onClick={() => setSearchTerm("")} size={16} />
+          }}
         />
       </SearchBox>
       {isVisible && (

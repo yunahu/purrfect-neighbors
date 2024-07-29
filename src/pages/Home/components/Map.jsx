@@ -8,8 +8,8 @@ import { useSearch } from "../../../context/useSearch";
 
 mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN;
 
-const Map = ({ latitude, longitude, radius, selection }) => {
-  const { pets, products } = useSearch();
+const Map = ({ latitude, longitude, radius, selection, handleSelection }) => {
+  const { searchTerm, pets, products } = useSearch();
 
   const mapContainer = useRef(null);
   const map = useRef(null);
@@ -48,11 +48,23 @@ const Map = ({ latitude, longitude, radius, selection }) => {
   });
 
   useEffect(() => {
+    if (pets?.length > products?.length) {
+      handleSelection("pets");
+    } else if (products?.length > pets?.length) {
+      handleSelection("products");
+    }
+  }, [pets, products, handleSelection]);
+
+  useEffect(() => {
     markers.forEach((marker) => marker.remove());
     if (!posts.length) return;
     const link = selection == "products" ? "product" : "pet";
     const data =
-      selection == "products" ? (products.length ? products : posts) : pets;
+      searchTerm.trim() === ""
+        ? posts
+        : selection == "products"
+          ? products
+          : pets;
     // console.log(data);
     const newMarkers = [];
     data.forEach((post) => {
