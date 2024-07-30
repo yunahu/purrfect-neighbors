@@ -1,4 +1,4 @@
-import { Button, Divider, Space, Tabs, Typography } from "antd";
+import { Button, Divider, Space, Tabs, Typography, Spin, message } from "antd";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
@@ -20,36 +20,51 @@ const Item = styled.div`
 
 function Profile() {
   const { user, updateUsername } = useAuth();
-  const navigate = useNavigate();
   const username = user ? user.name : "Guest";
+
+  const navigate = useNavigate();
+  
   const [editName, setEditName] = useState(username);
   const [isEditing, setIsEditing] = useState(false);
 
-  const [postsData, setPostsData] = useState([
-    { id: "1", title: "", content: "This user has no posts." }
-  ]);
-  const [commentsData, setCommentsData] = useState([
-    { id: "1", content: "This user has no comments." }
-  ]);
+  const [postsData, setPostsData] = useState([]);
+  const [commentsData, setCommentsData] = useState([]);
 
-  const posts = postsData.map((post, i) => (
-    <li key={post.id}>
-      <Item onClick={() => navigate(`/product/${post.id}`)}>
-        <Title level={3}>{post.title}</Title>
-        <p>{post.content}</p>
-      </Item>
-      {i < postsData.length - 1 && <Divider />}
-    </li>
-  ));
+  const [loadingPosts, setLoadingPosts] = useState(true);
+  const [loadingComments, setLoadingComments] = useState(true);
 
-  const comments = commentsData.map((comment, i) => (
-    <li key={comment.id}>
-      <Item>
-        <p>{comment.content}</p>
-      </Item>
-      {i < commentsData.length - 1 && <Divider />}
+  const posts = loadingPosts ? <Spin/> : (postsData.length ? 
+    postsData.map((post, i) => (
+      <li key={post.id}>
+        <Item onClick={() => navigate(`/product/${post.id}`)}>
+          <Title level={3}>{post.title}</Title>
+          <p>{post.content}</p>
+        </Item>
+        {i < postsData.length - 1 && <Divider />}
+      </li>
+    )) 
+    : 
+    (
+    <li>
+      <p>This user has no posts.</p>
     </li>
-  ));
+    ));
+
+  const comments = loadingComments ? <Spin/> : (commentsData.length ? 
+    commentsData.map((comment, i) => (
+      <li key={comment.id}>
+        <Item onClick={() => navigate(`/product/${comment.post_id}`)}>
+          <p>{comment.content}</p>
+        </Item>
+        {i < commentsData.length - 1 && <Divider />}
+      </li>
+    )) 
+    : 
+    (
+    <li>
+      <p>This user has no comments.</p>
+    </li>
+    ));
 
   const items = [
     { key: "1", label: "Posts", children: <ul>{posts}</ul> },
@@ -74,7 +89,7 @@ function Profile() {
   };
 
   useEffect(() => {
-    const fetchPost = async () => {
+    const fetchPosts = async () => {
       try {
         const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/user/posts`, {
           method: "GET",
@@ -86,22 +101,34 @@ function Profile() {
         const data = await response.json();
         setPostsData(data);
 
-        const response2 = await fetch(`${import.meta.env.VITE_BACKEND_URL}/user/comments`, {
-          method: "GET",
-          credentials: "include"
-        });
-        if (!response2.ok) {
-          throw new Error('Failed to fetch comments');
-        }
-        const comments = await response2.json();
-        setCommentsData(comments);
-
       } catch (error) {
-        console.error(error);
+        message.error("Failed to fetch posts.");
+      } finally {
+        setLoadingPosts(false);
       }
     };
 
-    fetchPost();
+    const fetchComments = async () => {
+      try {
+        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/user/comments`, {
+          method: "GET",
+          credentials: "include"
+        });
+        if (!response.ok) {
+          throw new Error('Failed to fetch posts');
+        }
+        const data = await response.json();
+        setCommentsData(data);
+
+      } catch (error) {
+        message.error("Failed to fetch comments.");
+      } finally {
+        setLoadingComments(false);
+      }
+    };
+
+    fetchPosts();
+    fetchComments();
   }, []);
 
   return (

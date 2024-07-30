@@ -1,6 +1,7 @@
 import { Radio } from "antd";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import styled from "styled-components";
+import { useLocation } from "react-router-dom";
 
 import Map from "./components/Map";
 
@@ -43,11 +44,23 @@ const StyledRadioButton = styled(Radio.Button)`
 `;
 
 const Home = () => {
-  const latitude = 49.2827; // Vancouver latitude
-  const longitude = -123.1207; // Vancouver longitude
-  const radius = 100;
+  const location = useLocation();
 
-  const [selection, setSelection] = useState('products');
+  const getQueryParams = useMemo(() => {
+    const searchParams = new URLSearchParams(location.search);
+
+    const latitude = parseFloat(searchParams.get('latitude')) || 49.2827; // Default to Vancouver latitude
+    const longitude = parseFloat(searchParams.get('longitude')) || -123.1207; // Default to Vancouver longitude
+    const selection = searchParams.get('selection') || 'products';
+
+    return { latitude, longitude, selection };
+  }, [location.search]);
+
+  const { latitude, longitude, selection: initialSelection } = getQueryParams;
+
+  const radius = 100; // Default radius
+
+  const [selection, setSelection] = useState(initialSelection);
 
   const handleChange = (e) => {
     setSelection(e.target.value);

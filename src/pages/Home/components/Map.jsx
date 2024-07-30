@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import { message } from "antd";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 
@@ -16,21 +17,6 @@ const Map = ({ latitude, longitude, radius, selection }) => {
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [popupContent, setPopupContent] = useState({});
 
-  const fetchPosts = async () => {
-    try {
-      const endpoint = (selection == 'products') ? 'donations' : 'pets';
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/${endpoint}?latitude=${latitude}&longitude=${longitude}&radius=${radius}`);
-      const data = await response.json();
-      setPosts(data);
-    } catch (error) {
-      console.error("Error fetching posts:", error);
-    }
-  };
-
-  useEffect(() => {
-    fetchPosts();
-  }, [selection]);
-
   useEffect(() => {
     if (map.current) return;
     map.current = new mapboxgl.Map({
@@ -39,7 +25,22 @@ const Map = ({ latitude, longitude, radius, selection }) => {
       center: [longitude, latitude],
       zoom: 12
     });
-  });
+  }, [latitude, longitude]);
+
+  useEffect(() => {
+    const fetchPosts = async () => {
+      try {
+        const endpoint = (selection == 'products') ? 'donations' : 'pets';
+        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/${endpoint}?latitude=${latitude}&longitude=${longitude}&radius=${radius}`);
+        const data = await response.json();
+        setPosts(data);
+      } catch (error) {
+        message.error("Unable to fetch posts. Try again later.");
+      }
+    };
+
+    fetchPosts();
+  }, [selection]);
 
   useEffect(() => {
     markers.forEach(marker => marker.remove());

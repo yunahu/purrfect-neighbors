@@ -5,7 +5,23 @@ import { LuMapPin } from "react-icons/lu";
 
 import ContentBox from "../components/ContentBox";
 
-const { Title } = Typography;
+import styled from "styled-components";
+
+const { Title, Text } = Typography;
+
+const LocationDisplay = styled.div`
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+`;
+
+const StyledText = styled(Text)`
+  color: var(--color-brand-100);
+  margin-left: 1.75rem;
+  svg {
+    margin-right: 0.5rem;
+  }
+`;
 
 function ShareItems() {
   const [form] = Form.useForm();
@@ -31,28 +47,32 @@ function ShareItems() {
         message.success("Item shared successfully!");
         form.resetFields();
         setLocation({ latitude: null, longitude: null });
+
       } else {
         message.error("Failed to share item. Please try again later.");
       }
+
     } catch (error) {
       message.error("An error occurred. Please try again.");
     }
   };
 
-  const handleAddLocation = () => {
+  const handleAddLocation = async () => {
     if (navigator.geolocation) {
 
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const { latitude, longitude } = position.coords;
-          setLocation({ latitude, longitude });
-          form.setFieldsValue({ latitude, longitude });
-          message.success("Location added successfully!");
-        },
-        (error) => {
-          message.error("Unable to retrieve your location.");
-        }
-      );
+      try {
+        const position = await new Promise((resolve, reject) => {
+          navigator.geolocation.getCurrentPosition(resolve, reject);
+        });
+
+        const { latitude, longitude } = position.coords;
+        setLocation({ latitude, longitude });
+        form.setFieldsValue({ latitude, longitude });
+
+        message.success("Location added successfully!");
+      } catch (error) {
+        message.error("Unable to retrieve your location.");
+      }
 
     } else {
       message.error("Geolocation is not supported by your browser.");
@@ -98,23 +118,25 @@ function ShareItems() {
           </Form.Item>
           <Form.Item>
             <Flex justify="space-between">
-              <Tooltip title="Add location">
-                <Button
-                  type="text"
-                  icon={<LuMapPin />}
-                  shape="round"
-                  aria-label="Click to add location"
-                  onClick={handleAddLocation}
-              >
-                  Add Location
-                </Button>
-              </Tooltip>
-              {location.latitude && location.longitude && (
-                <Form.Item>
-                  <Typography.Text>Latitude: {location.latitude} </Typography.Text>
-                  <Typography.Text>Longitude: {location.longitude}</Typography.Text>
-                </Form.Item>
-              )}
+              <LocationDisplay>
+                {location.latitude && location.longitude ? (
+                  <StyledText>
+                    <LuMapPin /> Latitude: {location.latitude}, Longitude: {location.longitude}
+                  </StyledText>
+                ) : (
+                  <Tooltip title="Add location">
+                    <Button
+                      type="text"
+                      icon={<LuMapPin />}
+                      shape="round"
+                      aria-label="Click to add location"
+                      onClick={handleAddLocation}
+                    >
+                      Add Location
+                    </Button>
+                  </Tooltip>
+                )}
+              </LocationDisplay>
               <Tooltip title="Submit">
             
               <Button
