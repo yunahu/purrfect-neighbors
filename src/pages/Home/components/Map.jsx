@@ -51,7 +51,7 @@ const Map = () => {
           link: `/${link}/${post.id}`
         };
         if (link == "pet") {
-          popupContent.image = post.image;
+          popupContent.image = post.image ? post.image.split(",")[0] : null;
         }
         setPopupContent(popupContent);
         setPosition({
