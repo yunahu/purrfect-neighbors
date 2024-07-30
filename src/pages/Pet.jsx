@@ -1,4 +1,5 @@
-import { Col, Image, Row, Space, Typography } from "antd";
+import { Col, Image, message, Row, Space, Typography } from "antd";
+import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import styled from "styled-components";
 
@@ -43,7 +44,7 @@ function Pet() {
   const { id } = useParams();
 
   // Simulate pet bio data
-  const { name, type, breed, location, image, contact, description } = {
+  const [pet, setPet] = useState({
     name: "Dapang",
     type: "Cat",
     breed: "British Shorthair",
@@ -56,34 +57,68 @@ function Pet() {
     },
     description:
       "Dapang is a British Shorthair cat. He is 3 years old and loves to play with toys."
-  };
+  });
+
+  useEffect(() => {
+    const fetchPost = async () => {
+      try {
+        const response = await fetch(
+          `${import.meta.env.VITE_BACKEND_URL}/pets/${id}`
+        );
+        if (!response.ok) {
+          throw new Error("Failed to fetch post");
+        }
+        const data = await response.json();
+
+        const fetchedPet = {
+          name: data.title,
+          type: data.type || "Unspecified Type",
+          breed: data.breed || "Unspecified Breed",
+          location: data.location,
+          image: data.imageUrl || "https://http.cat/images/200.jpg",
+          contact: {
+            name: data.postBy,
+            email: data.contactEmail || "abc@mail.com",
+            phone: data.contactPhone || "123-456-7890"
+          },
+          description: data.description
+        };
+
+        setPet(fetchedPet);
+      } catch (error) {
+        message.error("Failed to load post.");
+      }
+    };
+
+    fetchPost();
+  }, [id]);
 
   return (
     <>
       <Space size="middle">
         <Back />
         <Title level={1}>
-          {name}, {location}
+          {pet.name}, {pet.location}
         </Title>
       </Space>
       <StyledRow>
         <Col span={24} lg={16}>
-          <Image src={image} alt={name} />
+          <Image src={pet.image} alt={pet.name} />
         </Col>
         <Col span={24} lg={8}>
           <Contact>
             <Title level={2}>Contact</Title>
-            <Text>From: {contact.name}</Text>
-            <Text>Email: {contact.email}</Text>
-            <Text>Phone: {contact.phone}</Text>
+            <Text>From: {pet.contact.name}</Text>
+            <Text>Email: {pet.contact.email}</Text>
+            <Text>Phone: {pet.contact.phone}</Text>
           </Contact>
         </Col>
       </StyledRow>
       <MoreInfo>
         <Bio>
-          {type} / {breed} / From {location}
+          {pet.type} / {pet.breed} / From {pet.location}
         </Bio>
-        {description}
+        {pet.description}
         <br />
         id: {id}
         <br />
