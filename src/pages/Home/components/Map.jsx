@@ -8,34 +8,17 @@ import { useSearch } from "../../../context/useSearch";
 
 mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN;
 
-const Map = ({ latitude, longitude, radius, selection, handleSelection }) => {
-  const { searchTerm, pets, products } = useSearch();
+const Map = () => {
+  const { geolocation, filter, pets, products } = useSearch();
+  const { latitude, longitude } = geolocation;
+  const { selection } = filter;
 
   const mapContainer = useRef(null);
   const map = useRef(null);
-  const [posts, setPosts] = useState([]);
   const [markers, setMarkers] = useState([]);
   const [visible, setVisible] = useState(false);
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [popupContent, setPopupContent] = useState({});
-
-  const fetchPosts = async () => {
-    try {
-      const endpoint = selection == "products" ? "donations" : "pets";
-      const response = await fetch(
-        `${import.meta.env.VITE_BACKEND_URL}/${endpoint}?latitude=${latitude}&longitude=${longitude}&radius=${radius}`
-      );
-      const data = await response.json();
-      console.log(data);
-      setPosts(data);
-    } catch (error) {
-      console.error("Error fetching posts:", error);
-    }
-  };
-
-  useEffect(() => {
-    fetchPosts();
-  }, [selection]);
 
   useEffect(() => {
     if (map.current) return;
@@ -48,24 +31,10 @@ const Map = ({ latitude, longitude, radius, selection, handleSelection }) => {
   });
 
   useEffect(() => {
-    if (pets?.length > products?.length) {
-      handleSelection("pets");
-    } else if (products?.length > pets?.length) {
-      handleSelection("products");
-    }
-  }, [pets, products, handleSelection]);
-
-  useEffect(() => {
     markers.forEach((marker) => marker.remove());
-    if (!posts.length) return;
+    if (!pets?.length && !products?.length) return;
     const link = selection == "products" ? "product" : "pet";
-    const data =
-      searchTerm.trim() === ""
-        ? posts
-        : selection == "products"
-          ? products
-          : pets;
-    // console.log(data);
+    const data = selection == "products" ? products : pets;
     const newMarkers = [];
     data.forEach((post) => {
       const marker = new mapboxgl.Marker()
@@ -75,8 +44,10 @@ const Map = ({ latitude, longitude, radius, selection, handleSelection }) => {
       marker.getElement().addEventListener("click", (e) => {
         e.stopPropagation();
         const popupContent = {
-          title: post.title,
-          description: post.content,
+          title: post.title || post.pet_name,
+          description:
+            post.content ||
+            `${post.pet_type}, ${post.breed}, ${post.pet_address}`,
           link: `/${link}/${post.id}`
         };
         if (link == "pet") {
@@ -93,7 +64,7 @@ const Map = ({ latitude, longitude, radius, selection, handleSelection }) => {
       newMarkers.push(marker);
     });
     setMarkers(newMarkers);
-  }, [posts, pets, products]);
+  }, [pets, products, selection]);
 
   return (
     <>

@@ -1,7 +1,9 @@
 import { Radio, Select, Space } from "antd";
-import { useState } from "react";
-import { FaCat } from "react-icons/fa6";
+import { useEffect, useState } from "react";
+import { FaCat, FaPaw } from "react-icons/fa";
 import styled from "styled-components";
+
+import { useSearch } from "../context/useSearch";
 
 const StyledRadioGroup = styled(Radio.Group)`
   display: flex;
@@ -37,34 +39,62 @@ const StyledSelect = styled(Select)`
   width: 120px;
 `;
 
-const types = ["Cat", "Dog"];
+const types = ["Cat", "Dog", "Bird", "Rabbit", "Hamster"];
 const breedOptions = {
-  Cat: [
-    "Abyssinian",
-    "American Bobtail",
-    "American Curl",
-    "American Shorthair"
-  ],
-  Dog: ["Affenpinscher", "Afghan Hound", "Airedale Terrier", "Akita"]
+  Cat: ["Siamese"],
+  Dog: ["Golden Retriever"],
+  Bird: ["Parakeet"],
+  Rabbit: ["Holland Lop"],
+  Hamster: ["Syrian"]
 };
 
-function Filter({ selection, handleChange }) {
+function Filter() {
+  const { filter, setFilter } = useSearch();
+  const { selection, type, breed } = filter;
   const [breeds, setBreeds] = useState(breedOptions[types[0]]);
-  const [breed, setBreed] = useState(null);
-  const handleTypeChange = (value) => {
-    setBreeds(breedOptions[value]);
-    setBreed(null);
+
+  useEffect(() => {
+    if (type) {
+      setBreeds(breedOptions[type]);
+    } else {
+      setBreeds(breedOptions[types[0]]);
+    }
+  }, [type]);
+
+  const handleSelection = (e) => {
+    const newSelection = e.target.value;
+    if (newSelection === selection) return;
+    setFilter((prev) => ({ ...prev, selection: newSelection }));
   };
+
+  const handleTypeChange = (value) => {
+    if (!value) {
+      setBreeds(breedOptions[types[0]]);
+      setFilter((prev) => ({ ...prev, type: "", breed: "" }));
+      return;
+    }
+    if (value === type) return;
+
+    setBreeds(breedOptions[value]);
+    setFilter((prev) => ({ ...prev, type: value, breed: "" }));
+  };
+
   const onBreedChange = (value) => {
-    setBreed(value);
+    if (value === breed) return;
+    if (!type) {
+      const matchedType = types.find((t) => breedOptions[t].includes(value));
+      setFilter((prev) => ({ ...prev, type: matchedType, breed: value }));
+      return;
+    }
+    setFilter((prev) => ({ ...prev, breed: value }));
   };
 
   return (
     <>
       <Space>
         <StyledRadioGroup
-          value={selection}
-          onChange={(e) => handleChange(e.target.value)}
+          value={selection === "" ? "pets" : selection}
+          onChange={handleSelection}
         >
           <StyledRadioButton value="pets">Pets</StyledRadioButton>
           <StyledRadioButton value="products">Products</StyledRadioButton>
@@ -74,13 +104,15 @@ function Filter({ selection, handleChange }) {
             <StyledSelect
               placeholder="Type"
               suffixIcon={<FaCat />}
+              value={type !== "" ? type : null}
               onChange={handleTypeChange}
               options={types?.map((type) => ({ value: type, label: type }))}
               allowClear
             />
             <StyledSelect
               placeholder="Breed"
-              value={breed}
+              suffixIcon={<FaPaw />}
+              value={breed !== "" ? breed : null}
               onChange={onBreedChange}
               options={breeds?.map((breed) => ({ value: breed, label: breed }))}
               allowClear

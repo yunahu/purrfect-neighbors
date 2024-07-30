@@ -79,7 +79,7 @@ function SearchBar() {
     if (location.pathname !== "/explore") {
       navigate("/explore");
     }
-    console.log(pets, products);
+    // console.log(pets, products);
   };
 
   return (
@@ -114,7 +114,7 @@ function SearchBar() {
             pets.map((pet) => (
               <div key={pet.id} onClick={() => navigate(`/pet/${pet.id}`)}>
                 <p>
-                  {pet.name}, {pet.type}, {pet.breed}, {pet.address}
+                  {pet.pet_name}, {pet.pet_type}, {pet.breed}, {pet.pet_address}
                 </p>
               </div>
             ))}

@@ -1,4 +1,3 @@
-import { useCallback, useState } from "react";
 import styled from "styled-components";
 
 import Filter from "../../components/Filter";
@@ -13,26 +12,10 @@ const Container = styled.div`
 `;
 
 const Home = () => {
-  const latitude = 49.2827; // Vancouver latitude
-  const longitude = -123.1207; // Vancouver longitude
-  const radius = 100;
-
-  const [selection, setSelection] = useState("products");
-
-  const handleChange = useCallback((value) => {
-    setSelection(value);
-  }, []);
-
   return (
     <Container>
-      <Filter selection={selection} handleChange={handleChange} />
-      <Map
-        latitude={latitude}
-        longitude={longitude}
-        radius={radius}
-        selection={selection}
-        handleSelection={handleChange}
-      />
+      <Filter />
+      <Map />
     </Container>
   );
 };
