@@ -1,0 +1,10 @@
+{
+  "types": ["Cat", "Dog", "Bird", "Rabbit", "Hamster"],
+  "breeds": {
+    "Cat": ["Siamese"],
+    "Dog": ["Golden Retriever"],
+    "Bird": ["Parakeet"],
+    "Rabbit": ["Holland Lop"],
+    "Hamster": ["Syrian"]
+  }
+}

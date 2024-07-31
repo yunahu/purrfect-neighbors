@@ -4,6 +4,7 @@ import { FaCat, FaPaw } from "react-icons/fa";
 import styled from "styled-components";
 
 import { useSearch } from "../context/useSearch";
+import animal from "../data/animal.json";
 
 const StyledRadioGroup = styled(Radio.Group)`
   display: flex;
@@ -39,16 +40,9 @@ const StyledSelect = styled(Select)`
   width: 120px;
 `;
 
-const types = ["Cat", "Dog", "Bird", "Rabbit", "Hamster"];
-const breedOptions = {
-  Cat: ["Siamese"],
-  Dog: ["Golden Retriever"],
-  Bird: ["Parakeet"],
-  Rabbit: ["Holland Lop"],
-  Hamster: ["Syrian"]
-};
-
 function Filter() {
+  const types = animal.types;
+  const breedOptions = animal.breeds;
   const { filter, setFilter } = useSearch();
   const { selection, type, breed } = filter;
   const [breeds, setBreeds] = useState(breedOptions[types[0]]);
