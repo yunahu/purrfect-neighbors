@@ -4,6 +4,7 @@ import AppLayout from "../components/AppLayout";
 import Home from "../pages/Home/Home";
 import Messages from "../pages/Messages";
 import Pet from "../pages/Pet";
+import PlaceAdoption from "../pages/PlaceAdoption";
 import Product from "../pages/Product";
 import Profile from "../pages/Profile";
 import ShareItems from "../pages/ShareItems";
@@ -20,6 +21,7 @@ const Router = () => (
       <Route path="/signin" element={<SignIn />} />
       <Route element={<PrivateRoute />}>
         <Route path="/share" element={<ShareItems />} />
+        <Route path="/adoption" element={<PlaceAdoption />} />
         <Route path="/messages" element={<Messages />} />
         <Route path="/profile" element={<Profile />} />
       </Route>

@@ -12,6 +12,11 @@ const antdTheme = {
       defaultHoverBg: "#c4360b",
       defaultColor: "#ffffff",
       colorText: "#f56b40"
+    },
+    Radio: {
+      colorBorder: "#fff",
+      colorPrimary: "#fff",
+      colorPrimaryHover: "#fff"
     }
   }
 };
