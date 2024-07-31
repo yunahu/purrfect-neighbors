@@ -4,10 +4,10 @@ import AppLayout from "../components/AppLayout";
 import Home from "../pages/Home/Home";
 import Messages from "../pages/Messages";
 import Pet from "../pages/Pet";
+import PlaceAdoption from "../pages/PlaceAdoption";
 import Product from "../pages/Product";
 import Profile from "../pages/Profile";
 import ShareItems from "../pages/ShareItems";
-import PlaceAdoption from "../pages/PlaceAdoption";
 import SignIn from "../pages/SignIn/SignIn";
 import PrivateRoute from "./PrivateRoute";
 
@@ -20,10 +20,10 @@ const Router = () => (
       <Route path="/product/:id" element={<Product />} />
       <Route path="/signin" element={<SignIn />} />
       <Route element={<PrivateRoute />}>
-      <Route path="/share" element={<ShareItems />} />
-      <Route path="/adoption" element={<PlaceAdoption />} />
-      <Route path="/messages" element={<Messages />} />
-      <Route path="/profile" element={<Profile />} />
+        <Route path="/share" element={<ShareItems />} />
+        <Route path="/adoption" element={<PlaceAdoption />} />
+        <Route path="/messages" element={<Messages />} />
+        <Route path="/profile" element={<Profile />} />
       </Route>
       <Route path="*" element={<div>Not Found</div>} />
     </Route>

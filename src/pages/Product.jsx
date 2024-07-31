@@ -5,6 +5,8 @@ import { LuArrowUp, LuMapPin } from "react-icons/lu";
 import { useNavigate, useParams } from "react-router-dom";
 import styled from "styled-components";
 
+import { useSearch } from "../context/useSearch"
+
 import Back from "../components/Back";
 import ContentBox from "../components/ContentBox";
 import UserAvatar from "../components/UserAvatar";
@@ -25,6 +27,7 @@ const Comment = styled.div`
 
 function Product() {
   const navigate = useNavigate();
+  const { setGeolocation, setFilter } = useSearch();
   const { id } = useParams();
   const { user } = useAuth();
 
@@ -104,7 +107,9 @@ function Product() {
 
   const handleMapPinClick = () => {
     if (post) {
-      navigate(`/explore?latitude=${post.latitude}&longitude=${post.longitude}&selection=products`);
+      setGeolocation((prev) => ({...prev, latitude: post.latitude, longitude: post.longitude}));
+      setFilter((prev) => ({ ...prev, selection:"products" }));
+      navigate(`/explore`);
     }
   };
 

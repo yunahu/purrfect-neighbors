@@ -1,11 +1,10 @@
 import { useState, useEffect } from "react";
 import { Badge, Divider, Tabs, Typography, Spin, message } from "antd";
 import { useNavigate } from "react-router-dom";
+import styled from "styled-components";
 
 import ContentBox from "../components/ContentBox";
 import DMs from "../components/DMs";
-
-import styled from "styled-components";
 
 const { Title } = Typography;
 
@@ -66,15 +65,18 @@ function Messages() {
     } catch (error) {
       message.error("An error occurred. Please try again.");
     }
-  }
+  };
 
   useEffect(() => {
     const fetchNotifications = async () => {
       try {
-        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/user/notifications`, {
-          method: "GET",
-          credentials: "include"
-        });
+        const response = await fetch(
+          `${import.meta.env.VITE_BACKEND_URL}/user/notifications`,
+          {
+            method: "GET",
+            credentials: "include"
+          }
+        );
 
         if (!response.ok) {
           throw new Error('Failed to fetch comments.');
@@ -82,7 +84,6 @@ function Messages() {
 
         const data = await response.json();
         setCommentsData(data);
-
       } catch (error) {
         message.error("Unable to fetch comment notifications.");
       } finally {

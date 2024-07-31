@@ -3,6 +3,8 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import styled from "styled-components";
 
+import { useSearch } from "../context/useSearch"
+
 import Back from "../components/Back";
 
 const { Title, Text } = Typography;
@@ -47,6 +49,7 @@ const ClickableSpan = styled.span`
 function Pet() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { setGeolocation, setFilter } = useSearch();
 
   const [loading, setLoading] = useState(true);
 
@@ -55,9 +58,11 @@ function Pet() {
   useEffect(() => {
     const fetchPet = async () => {
       try {
-        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/pets/${id}`);
+        const response = await fetch(
+          `${import.meta.env.VITE_BACKEND_URL}/pets/${id}`
+        );
         if (!response.ok) {
-          throw new Error('Failed to fetch post');
+          throw new Error("Failed to fetch post");
         }
         const data = await response.json();
 
@@ -74,7 +79,9 @@ function Pet() {
 
   const handleLocationClick = () => {
     if (pet) {
-      navigate(`/explore?latitude=${pet.latitude}&longitude=${pet.longitude}&selection=pets`);
+      setGeolocation((prev) => ({...prev, latitude: pet.latitude, longitude: pet.longitude}));
+      setFilter((prev) => ({ ...prev, selection:"pets" }));
+      navigate(`/explore`);
     }
   };
 

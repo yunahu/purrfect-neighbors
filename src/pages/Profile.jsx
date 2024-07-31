@@ -91,12 +91,15 @@ function Profile() {
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/user/posts`, {
-          method: "GET",
-          credentials: "include"
-        });
+        const response = await fetch(
+          `${import.meta.env.VITE_BACKEND_URL}/user/posts`,
+          {
+            method: "GET",
+            credentials: "include"
+          }
+        );
         if (!response.ok) {
-          throw new Error('Failed to fetch posts');
+          throw new Error("Failed to fetch posts");
         }
         const data = await response.json();
         setPostsData(data);

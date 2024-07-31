@@ -1,13 +1,29 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
-import { Button, Flex, Form, Input, Tooltip, Typography, Upload, Image, message } from "antd";
-import { LuMapPin, LuUpload } from "react-icons/lu";
+import { Button, Flex, Form, Input, Tooltip, Typography, Upload, Image, Select, message } from "antd";
+import { LuMapPin, LuUpload, LuX } from "react-icons/lu";
+import { FaCat, FaPaw } from "react-icons/fa";
 
 import ContentBox from "../components/ContentBox";
 
 import styled from "styled-components";
 
 const { Title, Text } = Typography;
+
+const types = ["Cat", "Dog", "Bird", "Rabbit", "Hamster"];
+const breedOptions = {
+  Cat: ["Siamese"],
+  Dog: ["Golden Retriever"],
+  Bird: ["Parakeet"],
+  Rabbit: ["Holland Lop"],
+  Hamster: ["Syrian"]
+};
+
+const FormColumn = styled(Flex)`
+  width: 100%;
+  flex-direction: column;
+  gap: 1rem;
+`;
 
 const LocationDisplay = styled.div`
   min-height: 40px;
@@ -39,35 +55,45 @@ const StyledButton = styled(Button)`
 
 const StyledImage = styled(Image)`
   border-radius: 20px;
-  width: 10rem !important;
-  height: 10rem !important;
+  width: 20rem !important;
+  height: 20rem !important;
   object-fit: cover;
 `
 
-const FilenameText = styled(Text)`
-  visibility: ${({ visible }) => (visible ? 'visible' : 'hidden')};
-  margin-top: 0.5rem;
-  color: var(--color-brand-100);
-`;
-
 const CenteredDiv = styled.div`
+  height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
-  min-height: 8rem;
+  justify-content: center;
 `;
 
-const FormItemRow = styled.div`
-  display: flex;
+const StyledFlex = styled(Flex)`
+  width: 100%;
   gap: 1rem;
+`;
+
+const StyledSelect = styled(Select)`
+  width: 27rem !important;
 `;
 
 function PlaceAdoption() {
   const [form] = Form.useForm();
   const [location, setLocation] = useState({ latitude: null, longitude: null });
   const [imageUrl, setImageUrl] = useState(null);
-  const [fileName, setFileName] = useState(null);
   const [uploading, setUploading] = useState(false);
+
+  const [type, setType] = useState("");
+  const [breeds, setBreeds] = useState([]);
+
+  useEffect(() => {
+    form.setFieldsValue({ breed: null });
+    if (type) {
+      setBreeds(breedOptions[type]);
+    } else {
+      setBreeds([]);
+    }
+  }, [type]);
 
   const onFinish = async (values) => {
     if (!location.latitude || !location.longitude) {
@@ -76,19 +102,22 @@ function PlaceAdoption() {
     }
 
     if (!imageUrl) {
-        message.error("Please upload an image.");
-        return;
+      message.error("Please upload an image.");
+      return;
     }
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/pets/create`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify(values),
-      });
+      const response = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/pets/create`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          credentials: "include",
+          body: JSON.stringify(values)
+        }
+      );
 
       if (response.ok) {
         message.success("Pet placed for adoption!");
@@ -96,7 +125,6 @@ function PlaceAdoption() {
         form.resetFields();
         setLocation({ latitude: null, longitude: null });
         setImageUrl(null);
-        setFileName(null);
       } else {
         message.error("Failed to place adoption. Please try again later.");
       }
@@ -135,28 +163,29 @@ function PlaceAdoption() {
     formData.append('file', file);
   
     try {
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/pets/upload`, {
-        method: "POST",
-        credentials: "include",
-        body: formData,
-      });
-  
+      const response = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/pets/upload`,
+        {
+          method: "POST",
+          credentials: "include",
+          body: formData
+        }
+      );
+
       if (response.ok) {
         const url = await response.text();
 
         setImageUrl(url);
         form.setFieldsValue({ imageUrl: url });
 
-        setFileName(file.name);
-
         message.success("Image uploaded.");
       } else {
         message.error("Failed to upload image.");
       }
     } catch (error) {
-        message.error("An error occurred. Please try again.");
+      message.error("An error occurred. Please try again.");
     } finally {
-        setUploading(false);
+      setUploading(false);
     }
   };
 
@@ -165,71 +194,87 @@ function PlaceAdoption() {
       <Title level={1}>Place Adoption</Title>
       <ContentBox>
         <Form form={form} onFinish={onFinish}>
-          <Form.Item
-            name="name"
-            rules={[{ required: true, message: "Please input the name of the pet." }]}
-          >
-            <Input
-              size="large"
-              placeholder="Name"
-              aria-label="Name"
-              showCount
-              maxLength={100}
-            />
-          </Form.Item>
-          <Form.Item
-            name="description"
-            rules={[
-              { required: true, message: "Please input the description." }
-            ]}
-          >
-            <Input.TextArea
-              placeholder="Description"
-              rows={4}
-              aria-label="Description"
-              showCount
-              maxLength={1000}
-            />
-          </Form.Item>
-          <FormItemRow>
-            <Form.Item name="type">
-              <Input
-                size="large"
-                placeholder="Type (optional)"
-                aria-label="Type"
-                showCount
-                maxLength={100}
-              />
-            </Form.Item>
-            <Form.Item name="breed">
-              <Input
-                size="large"
-                placeholder="Breed (optional)"
-                aria-label="Breed"
-                showCount
-                maxLength={100}
-              />
-            </Form.Item>
-          </FormItemRow>
-          <CenteredDiv>
-          {imageUrl ? (
-              <StyledImage src={imageUrl} alt="Uploaded pet" />
-            ) : (
-              <Upload
-                name="file"
-                showUploadList={false}
-                customRequest={({ file }) => handleUpload(file)}
-                accept="image/*"
+          <StyledFlex>
+            <FormColumn>
+              <Form.Item
+                name="name"
+                rules={[
+                  { required: true, message: "Please input the name of the pet." }
+                ]}
               >
-                <StyledButton
-                  icon={<LuUpload />}
-                  loading={uploading}
-                  shape="round"
+                <Input
+                  size="large"
+                  placeholder="Name"
+                  aria-label="Name"
+                  showCount
+                  maxLength={100}
                 />
-              </Upload>
-            )}
-            <FilenameText visible={!!fileName}>{fileName}</FilenameText>
-          </CenteredDiv>
+              </Form.Item>
+              <Form.Item
+                name="description"
+                rules={[
+                  { required: true, message: "Please input the description." }
+                ]}
+              >
+                <Input.TextArea
+                  placeholder="Description"
+                  rows={4}
+                  aria-label="Description"
+                  showCount
+                  maxLength={1000}
+                />
+              </Form.Item>
+              <StyledFlex>
+                <Form.Item name="type">
+                  <StyledSelect
+                    placeholder="Type (optional)"
+                    suffixIcon={<FaCat />}
+                    onChange={(value) => {setType(value)}}
+                    options={types?.map((type) => ({ value: type, label: type }))}
+                    allowClear
+                  />
+                </Form.Item>
+                <Form.Item name="breed">
+                  <StyledSelect
+                    placeholder="Breed (optional)"
+                    suffixIcon={<FaPaw />}
+                    options={breeds?.map((breed) => ({ value: breed, label: breed }))}
+                    allowClear
+                  />
+                </Form.Item>
+              </StyledFlex>
+            </FormColumn>
+            <FormColumn>
+              <CenteredDiv>
+                {imageUrl ? (
+                  <>
+                    <StyledImage src={imageUrl} alt="Uploaded pet" />
+                    <Button
+                      type="text"
+                      icon={<LuX />}
+                      shape="round"
+                      aria-label="Click to remove image."
+                      onClick={() => {setImageUrl(null)}}
+                    >
+                      Remove
+                    </Button>
+                  </>
+                ) : (
+                  <Upload
+                    name="file"
+                    showUploadList={false}
+                    customRequest={({ file }) => handleUpload(file)}
+                    accept="image/*"
+                  >
+                    <StyledButton
+                      icon={<LuUpload />}
+                      loading={uploading}
+                    />
+                  </Upload>
+                )}
+              </CenteredDiv>
+            </FormColumn>
+          </StyledFlex>
           <Form.Item name="imageUrl" hidden>
             <Input type="text" />
           </Form.Item>
@@ -261,8 +306,7 @@ function PlaceAdoption() {
                 )}
               </LocationDisplay>
               <Tooltip title="Submit">
-            
-              <Button
+                <Button
                   type="primary"
                   htmlType="submit"
                   shape="round"

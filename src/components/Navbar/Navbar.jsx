@@ -2,11 +2,23 @@ import { Link, useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
 import { useAuth } from "../../context/useAuth";
+import SearchBar from "../SearchBar";
 
 const Container = styled.div`
   height: 80px;
-  border-bottom: 1px solid var(--color-grey-500);
+  border-bottom: 1px solid var(--color-grey-100);
   position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 0 20px;
+`;
+
+const User = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 20px;
 `;
 
 const SignInOutButton = styled.button`
@@ -21,17 +33,12 @@ const SignInOutButton = styled.button`
     props.$color === "black" ? "none" : `1px solid var(--color-grey-400)`};
   display: flex;
   align-items: center;
-  position: absolute;
-  right: 100px;
   justify-content: center;
   font-size: 16px;
   cursor: pointer;
 `;
 
 const UserLink = styled(Link)`
-  position: absolute;
-  top: 25px;
-  right: 300px;
   text-decoration: underline;
 `;
 
@@ -47,20 +54,21 @@ const Navbar = () => {
 
   return (
     <Container>
-      Navbar
-      <UserLink to={user ? "/profile" : "/signin"}>
-        {username.toUpperCase()}
-      </UserLink>
-      {!user && (
-        <Link to="/signin">
-          <SignInOutButton $color="black">Sign In</SignInOutButton>
-        </Link>
-      )}
-      {user && (
-        <SignInOutButton onClick={handleSignOut} $color="white">
-          Sign Out
-        </SignInOutButton>
-      )}
+      <SearchBar />
+      <User>
+        <UserLink to={user ? "/profile" : "/signin"}>
+          {username.toUpperCase()}
+        </UserLink>
+        {user ? (
+          <SignInOutButton onClick={handleSignOut} $color="white">
+            Sign Out
+          </SignInOutButton>
+        ) : (
+          <Link to="/signin">
+            <SignInOutButton $color="black">Sign In</SignInOutButton>
+          </Link>
+        )}
+      </User>
     </Container>
   );
 };
