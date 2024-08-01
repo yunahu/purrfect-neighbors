@@ -1,11 +1,15 @@
+import { useLazyQuery } from "@apollo/client";
 import { Badge, Button, Input, List } from "antd";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import styled from "styled-components";
 
-import { useMessages } from "../hooks/useMessages";
+import { GET_CHAT, useChats } from "../hooks/useChats";
+import { socket } from "../socket";
 import UserAvatar from "./UserAvatar";
 
 const { TextArea } = Input;
+
+//#region Styles
 
 const Layout = styled.div`
   display: grid;
@@ -64,108 +68,164 @@ const InputContainer = styled.div`
   gap: 10px;
 `;
 
+const NewChat = styled.div`
+  text-align: center;
+`;
+
+//#endregion Styles
+
 function DMs() {
-  const { messages, loading, error, markAsRead, updateMessages } =
-    useMessages();
-
-  const [currentChat, setCurrentChat] = useState(0);
+  const {
+    chats,
+    setChats,
+    loading,
+    error,
+    updateLastSeen,
+    sendNewMessage,
+    createChat
+  } = useChats();
   const [inputValue, setInputValue] = useState("");
-  const newestMessage = useRef(null);
+  const [chat, setChat] = useState(null);
+  const [getChat, { loading: chatLoading, error: chatError }] =
+    useLazyQuery(GET_CHAT);
 
-  const handleUserClick = (index) => {
-    setCurrentChat(index);
-    markAsRead({ variables: { chatIndex: index } });
+  useEffect(() => {
+    const onNewMessage = (newMsg) => {
+      if (
+        newMsg.senderId === chat?.recipient.id ||
+        newMsg.senderId === chat?.sender.id
+      ) {
+        const { messages, ...rest } = chat;
+        const newMessages = [...messages, newMsg];
+        setChat({ ...rest, messages: newMessages });
+      } else {
+        setChats((prevChats) => {
+          return prevChats.map((chat) =>
+            chat.recipient.id === newMsg.senderId
+              ? { ...chat, unread: chat.unread + 1 }
+              : chat
+          );
+        });
+      }
+    };
+
+    const onNewChat = (newChat) => {
+      setChats((prevChats) => [...prevChats, newChat]);
+    };
+
+    socket.on("newMessage", onNewMessage);
+    socket.on("newChat", onNewChat);
+
+    return () => {
+      socket.off("newMessage", onNewMessage);
+      socket.off("newChat", onNewChat);
+    };
+  }, [chat]);
+
+  const handleUserClick = async (clickedChat) => {
+    const clone = structuredClone(chats);
+    const chat = clone.find((x) => x.recipient.id === clickedChat.recipient.id);
+    chat.unread = 0;
+    setChats(clone);
+
+    updateLastSeen({ variables: { recipientId: clickedChat.recipient.id } });
+    const result = await getChat({
+      variables: { recipientId: clickedChat.recipient.id }
+    });
+    setChat(result.data.chat);
   };
 
-  const handleSendMsg = async () => {
+  const handleSendMsg = () => {
+    if (!chat) return;
     if (inputValue.trim() === "") return;
-    // console.log(currentChat, inputValue);
     try {
-      await updateMessages({
-        variables: { chatIndex: currentChat, inputValue }
+      sendNewMessage({
+        variables: { recipientId: chat.recipient.id, content: inputValue }
       });
-      newestMessage.current?.scrollIntoView({ behavior: "smooth" });
       setInputValue("");
     } catch (error) {
       console.error("Error sending message:", error);
     }
   };
 
-  const countUnread = (chat) => {
-    return chat.messages.filter((msg) => !msg.read).length;
+  const validateID = (id) => {
+    const num = Math.floor(Number(id));
+    return num !== Infinity && String(num) === id && num >= 0;
   };
 
-  const scrollToBottom = () => {
-    newestMessage.current?.scrollIntoView({ behavior: "smooth" });
+  const createNewChat = async () => {
+    const id = prompt("Please enter the id of the user: ");
+    if (validateID(id)) {
+      const intID = parseInt(id);
+      let response = await createChat({
+        variables: { recipientId: intID }
+      });
+      response = response.data.createChat;
+      if (response != "OK") alert(response);
+    } else alert("ID validation failed. Please check the user id again.");
   };
-
-  useEffect(() => {
-    if (messages && messages[currentChat]) {
-      scrollToBottom();
-      markAsRead({ variables: { chatIndex: currentChat } });
-    }
-  }, [currentChat, messages, markAsRead]);
 
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error: {error.message}</p>;
-  if (!messages || messages.length === 0) return <p>No messages found</p>;
 
   return (
     <Layout>
       <Sider>
         <UserList>
-          {messages.map((message, index) => (
+          {chats.map((x) => (
             <User
-              key={message.user}
-              className={currentChat === index ? "active" : ""}
-              onClick={() => handleUserClick(index)}
+              key={x.recipient.id}
+              className={chat?.recipient.id === x.recipient.id ? "active" : ""}
+              onClick={() => handleUserClick(x)}
             >
-              <UserAvatar size="small" name={message.user} gap={6} />
-              {countUnread(message) > 0 ? (
-                <Badge count={countUnread(message)} offset={[10, 0]}>
-                  <span>{message.user}</span>
+              <UserAvatar size="small" name={x.recipient.name} gap={6} />
+              {x.unread > 0 ? (
+                <Badge count={x.unread} offset={[10, 0]}>
+                  <span>{x.recipient.name}</span>
                 </Badge>
               ) : (
-                <span>{message.user}</span>
+                <span>{x.recipient.name}</span>
               )}
             </User>
           ))}
         </UserList>
+        <NewChat onClick={createNewChat}>New Chat</NewChat>
       </Sider>
       <MessageContainer>
-        <MessageList
-          itemLayout="horizontal"
-          dataSource={messages[currentChat].messages}
-          renderItem={(message, index) => (
-            <List.Item
-              key={index}
-              ref={
-                index === messages[currentChat].messages.length - 1
-                  ? newestMessage
-                  : null
-              }
-            >
-              <List.Item.Meta
-                title={message.sender}
-                description={message.content}
-              />
-            </List.Item>
-          )}
-        />
-        <InputContainer>
-          <TextArea
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            onKeyDown={(e) =>
-              e.key === "Enter" && !e.shiftKey && handleSendMsg()
-            }
-            placeholder="Type a message..."
-            autoSize
+        {chat && (
+          <MessageList
+            itemLayout="horizontal"
+            dataSource={chat.messages}
+            renderItem={(message) => (
+              <List.Item key={message.createdAt}>
+                <List.Item.Meta
+                  title={
+                    message.recipientId === chat.recipient.id
+                      ? chat.sender.name
+                      : chat.recipient.name
+                  }
+                  description={message.content}
+                />
+              </List.Item>
+            )}
           />
-          <Button type="primary" onClick={handleSendMsg}>
-            Send
-          </Button>
-        </InputContainer>
+        )}
+        {chat && (
+          <InputContainer>
+            <TextArea
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              onKeyDown={(e) =>
+                e.key === "Enter" && !e.shiftKey && handleSendMsg()
+              }
+              placeholder="Type a message..."
+              autoSize
+            />
+            <Button type="primary" onClick={handleSendMsg}>
+              Send
+            </Button>
+          </InputContainer>
+        )}
       </MessageContainer>
     </Layout>
   );
