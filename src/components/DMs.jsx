@@ -80,9 +80,23 @@ function DMs() {
 
   useEffect(() => {
     const onNewMessage = (newMsg) => {
-      const { messages, ...rest } = chat;
-      const newMessages = [...messages, newMsg];
-      setChat({ ...rest, messages: newMessages });
+      if (
+        newMsg.senderId === chat.recipient.id ||
+        newMsg.senderId === chat.sender.id
+      ) {
+        const { messages, ...rest } = chat;
+        const newMessages = [...messages, newMsg];
+        setChat({ ...rest, messages: newMessages });
+      } else {
+        setChats((prevChats) => {
+          return prevChats.map((chat) =>
+            chat.recipient.id === newMsg.senderId
+              ? { ...chat, unread: chat.unread + 1 }
+              : chat
+          );
+        });
+        console.log(chats);
+      }
     };
 
     socket.on("newMessage", onNewMessage);
