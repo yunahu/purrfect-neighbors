@@ -1,4 +1,5 @@
 import { gql, useMutation, useQuery } from "@apollo/client";
+import { useEffect, useState } from "react";
 
 const GET_CHATS = gql`
   query GetChats {
@@ -48,12 +49,16 @@ const SEND_NEW_MESSAGE = gql`
 
 export const useChats = () => {
   const { data, loading, error } = useQuery(GET_CHATS);
-  const chats = data?.chats || [];
+  const [chats, setChats] = useState([]);
+  useEffect(() => {
+    if (data) setChats(data.chats);
+  }, [data]);
   const [updateLastSeen] = useMutation(UPDATE_LAST_SEEN);
   const [sendNewMessage] = useMutation(SEND_NEW_MESSAGE);
 
   return {
     chats,
+    setChats,
     loading,
     error,
     updateLastSeen,

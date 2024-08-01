@@ -1,6 +1,6 @@
 import { useLazyQuery } from "@apollo/client";
 import { Badge, Button, Input, List } from "antd";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import styled from "styled-components";
 
 import { GET_CHAT, useChats } from "../hooks/useChats";
@@ -8,6 +8,8 @@ import { socket } from "../socket";
 import UserAvatar from "./UserAvatar";
 
 const { TextArea } = Input;
+
+//#region Styles
 
 const Layout = styled.div`
   display: grid;
@@ -66,88 +68,55 @@ const InputContainer = styled.div`
   gap: 10px;
 `;
 
-const sortChatByCreatedAt = (chat) => {
-  const compare = (m1, m2) => {
-    if (m1.createdAt < m2.createdAt) {
-      return -1;
-    }
-    if (m1.createdAt > m2.createdAt) {
-      return 1;
-    }
-    return 0;
-  };
-
-  return {
-    ...chat,
-    messages: [...chat.messages].sort(compare)
-  };
-};
+//#endregion Styles
 
 function DMs() {
-  const { chats, loading, error, updateLastSeen, sendNewMessage } = useChats();
-  const [currentChat, setCurrentChat] = useState(null);
+  const { chats, setChats, loading, error, updateLastSeen, sendNewMessage } =
+    useChats();
   const [inputValue, setInputValue] = useState("");
-  const newestMessage = useRef(null);
-  const [getChat, { loading: chatLoading, error: chatError, data }] =
+  const [chat, setChat] = useState(null);
+  const [getChat, { loading: chatLoading, error: chatError }] =
     useLazyQuery(GET_CHAT);
 
   useEffect(() => {
-    const onConnect = () => {
-      console.log("Connected!");
+    const onNewMessage = (newMsg) => {
+      const { messages, ...rest } = chat;
+      const newMessages = [...messages, newMsg];
+      setChat({ ...rest, messages: newMessages });
     };
 
-    const onNewMessageReceived = (params) => {
-      console.log("server received a new message", params);
-    };
-
-    socket.on("connect", onConnect);
-    socket.on("newMessageReceived", onNewMessageReceived);
+    socket.on("newMessage", onNewMessage);
 
     return () => {
-      socket.off("connect", onConnect);
-      socket.off("newMessageReceived", onNewMessageReceived);
+      socket.off("newMessage", onNewMessage);
     };
-  }, []);
+  }, [chat]);
 
-  let chat = data?.chat || [];
-  if (chat.messages) {
-    const sorted = sortChatByCreatedAt(chat);
-    chat = sorted;
-  }
+  const handleUserClick = async (clickedChat) => {
+    const clone = structuredClone(chats);
+    const chat = clone.find((x) => x.recipient.id === clickedChat.recipient.id);
+    chat.unread = 0;
+    setChats(clone);
 
-  const handleUserClick = async (chat) => {
-    await getChat({ variables: { recipientId: chat.recipient.id } });
-    setCurrentChat(chat);
-    updateLastSeen({ variables: { recipientId: chat.recipient.id } });
+    updateLastSeen({ variables: { recipientId: clickedChat.recipient.id } });
+    const result = await getChat({
+      variables: { recipientId: clickedChat.recipient.id }
+    });
+    setChat(result.data.chat);
   };
 
-  const handleSendMsg = async () => {
+  const handleSendMsg = () => {
+    if (!chat) return;
     if (inputValue.trim() === "") return;
     try {
-      await sendNewMessage({
+      sendNewMessage({
         variables: { recipientId: chat.recipient.id, content: inputValue }
       });
-      // newestMessage.current?.scrollIntoView({ behavior: "smooth" });
       setInputValue("");
-      socket.emit("newMessage", {
-        recipientId: chat.recipient.id,
-        content: inputValue
-      });
     } catch (error) {
       console.error("Error sending message:", error);
     }
   };
-
-  // const scrollToBottom = () => {
-  //   newestMessage.current?.scrollIntoView({ behavior: "smooth" });
-  // };
-
-  // useEffect(() => {
-  //   if (messages && messages[currentChat]) {
-  //     scrollToBottom();
-  //     markAsRead({ variables: { chatIndex: currentChat } });
-  //   }
-  // }, [currentChat, messages, markAsRead]);
 
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error: {error.message}</p>;
@@ -157,21 +126,19 @@ function DMs() {
     <Layout>
       <Sider>
         <UserList>
-          {chats.map((chat) => (
+          {chats.map((x) => (
             <User
-              key={chat.recipient.id}
-              className={
-                currentChat?.recipient.id === chat.recipient.id ? "active" : ""
-              }
-              onClick={() => handleUserClick(chat)}
+              key={x.recipient.id}
+              className={chat?.recipient.id === x.recipient.id ? "active" : ""}
+              onClick={() => handleUserClick(x)}
             >
-              <UserAvatar size="small" name={chat.recipient.name} gap={6} />
-              {chat.unread > 0 ? (
-                <Badge count={chat.unread} offset={[10, 0]}>
-                  <span>{chat.recipient.name}</span>
+              <UserAvatar size="small" name={x.recipient.name} gap={6} />
+              {x.unread > 0 ? (
+                <Badge count={x.unread} offset={[10, 0]}>
+                  <span>{x.recipient.name}</span>
                 </Badge>
               ) : (
-                <span>{chat.recipient.name}</span>
+                <span>{x.recipient.name}</span>
               )}
             </User>
           ))}
@@ -183,14 +150,7 @@ function DMs() {
             itemLayout="horizontal"
             dataSource={chat.messages}
             renderItem={(message) => (
-              <List.Item
-                key={message.createdAt}
-                // ref={
-                //   index === chat.messages.length - 1
-                //     ? newestMessage
-                //     : null
-                // }
-              >
+              <List.Item key={message.createdAt}>
                 <List.Item.Meta
                   title={
                     message.recipientId === chat.recipient.id
@@ -203,20 +163,22 @@ function DMs() {
             )}
           />
         )}
-        <InputContainer>
-          <TextArea
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            onKeyDown={(e) =>
-              e.key === "Enter" && !e.shiftKey && handleSendMsg()
-            }
-            placeholder="Type a message..."
-            autoSize
-          />
-          <Button type="primary" onClick={handleSendMsg}>
-            Send
-          </Button>
-        </InputContainer>
+        {chat && (
+          <InputContainer>
+            <TextArea
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              onKeyDown={(e) =>
+                e.key === "Enter" && !e.shiftKey && handleSendMsg()
+              }
+              placeholder="Type a message..."
+              autoSize
+            />
+            <Button type="primary" onClick={handleSendMsg}>
+              Send
+            </Button>
+          </InputContainer>
+        )}
       </MessageContainer>
     </Layout>
   );
