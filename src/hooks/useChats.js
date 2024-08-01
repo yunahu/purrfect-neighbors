@@ -47,6 +47,12 @@ const SEND_NEW_MESSAGE = gql`
   }
 `;
 
+const CREATE_CHAT = gql`
+  mutation ($recipientId: Int!) {
+    createChat(recipientId: $recipientId)
+  }
+`;
+
 export const useChats = () => {
   const { data, loading, error } = useQuery(GET_CHATS);
   const [chats, setChats] = useState([]);
@@ -55,6 +61,7 @@ export const useChats = () => {
   }, [data]);
   const [updateLastSeen] = useMutation(UPDATE_LAST_SEEN);
   const [sendNewMessage] = useMutation(SEND_NEW_MESSAGE);
+  const [createChat] = useMutation(CREATE_CHAT);
 
   return {
     chats,
@@ -62,6 +69,7 @@ export const useChats = () => {
     loading,
     error,
     updateLastSeen,
-    sendNewMessage
+    sendNewMessage,
+    createChat
   };
 };

@@ -68,11 +68,22 @@ const InputContainer = styled.div`
   gap: 10px;
 `;
 
+const NewChat = styled.div`
+  text-align: center;
+`;
+
 //#endregion Styles
 
 function DMs() {
-  const { chats, setChats, loading, error, updateLastSeen, sendNewMessage } =
-    useChats();
+  const {
+    chats,
+    setChats,
+    loading,
+    error,
+    updateLastSeen,
+    sendNewMessage,
+    createChat
+  } = useChats();
   const [inputValue, setInputValue] = useState("");
   const [chat, setChat] = useState(null);
   const [getChat, { loading: chatLoading, error: chatError }] =
@@ -98,10 +109,16 @@ function DMs() {
       }
     };
 
+    const onNewChat = (newChat) => {
+      setChats((prevChats) => [...prevChats, newChat]);
+    };
+
     socket.on("newMessage", onNewMessage);
+    socket.on("newChat", onNewChat);
 
     return () => {
       socket.off("newMessage", onNewMessage);
+      socket.off("newChat", onNewChat);
     };
   }, [chat]);
 
@@ -131,9 +148,25 @@ function DMs() {
     }
   };
 
+  const validateID = (id) => {
+    const num = Math.floor(Number(id));
+    return num !== Infinity && String(num) === id && num >= 0;
+  };
+
+  const createNewChat = async () => {
+    const id = prompt("Please enter the id of the user: ");
+    if (validateID(id)) {
+      const intID = parseInt(id);
+      let response = await createChat({
+        variables: { recipientId: intID }
+      });
+      response = response.data.createChat;
+      if (response != "OK") alert(response);
+    } else alert("ID validation failed. Please check the user id again.");
+  };
+
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error: {error.message}</p>;
-  if (!chats || chats.length === 0) return <p>No chats found</p>;
 
   return (
     <Layout>
@@ -156,6 +189,7 @@ function DMs() {
             </User>
           ))}
         </UserList>
+        <NewChat onClick={createNewChat}>New Chat</NewChat>
       </Sider>
       <MessageContainer>
         {chat && (
