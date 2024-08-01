@@ -7,17 +7,9 @@ import { FaCat, FaPaw } from "react-icons/fa";
 import ContentBox from "../components/ContentBox";
 
 import styled from "styled-components";
+import animal from "../data/animal.json";
 
 const { Title, Text } = Typography;
-
-const types = ["Cat", "Dog", "Bird", "Rabbit", "Hamster"];
-const breedOptions = {
-  Cat: ["Siamese"],
-  Dog: ["Golden Retriever"],
-  Bird: ["Parakeet"],
-  Rabbit: ["Holland Lop"],
-  Hamster: ["Syrian"]
-};
 
 const FormColumn = styled(Flex)`
   width: 100%;
@@ -44,9 +36,9 @@ const StyledButton = styled(Button)`
   background-color: white;
   border: 1px solid var(--color-brand-100);
   border-radius: 20px !important;
-  width: 10rem !important;
-  height: 10rem;
-  font-size: 24px;
+  width: 20rem !important;
+  height: 20rem;
+  font-size: 50px;
   &:hover {
     background-color: var(--color-brand-100);
     color: white;
@@ -78,6 +70,9 @@ const StyledSelect = styled(Select)`
 `;
 
 function PlaceAdoption() {
+  const types = animal.types;
+  const breedOptions = animal.breeds;
+
   const [form] = Form.useForm();
   const [location, setLocation] = useState({ latitude: null, longitude: null });
   const [imageUrl, setImageUrl] = useState(null);
@@ -260,17 +255,20 @@ function PlaceAdoption() {
                     </Button>
                   </>
                 ) : (
-                  <Upload
-                    name="file"
-                    showUploadList={false}
-                    customRequest={({ file }) => handleUpload(file)}
-                    accept="image/*"
-                  >
-                    <StyledButton
-                      icon={<LuUpload />}
-                      loading={uploading}
-                    />
-                  </Upload>
+                  <>
+                    <Upload
+                      name="file"
+                      showUploadList={false}
+                      customRequest={({ file }) => handleUpload(file)}
+                      accept="image/*"
+                    >
+                      <StyledButton
+                        icon={<LuUpload />}
+                        loading={uploading}
+                      />
+                    </Upload>
+                    <Text type="danger" style={{ marginTop: '5px' }}>*Do not include private info in uploaded images.</Text>
+                  </>
                 )}
               </CenteredDiv>
             </FormColumn>

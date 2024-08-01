@@ -28,7 +28,7 @@ const Map = () => {
       center: [longitude, latitude],
       zoom: 12
     });
-  }, [latitude, longitude]);
+  });
 
   useEffect(() => {
     markers.forEach((marker) => marker.remove());
