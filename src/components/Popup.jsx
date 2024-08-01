@@ -1,4 +1,4 @@
-import { Modal, Typography } from "antd";
+import { Divider, Modal, Typography } from "antd";
 import { useEffect } from "react";
 import styled from "styled-components";
 
@@ -41,10 +41,8 @@ const ImageWrapper = styled.div`
 `;
 
 const Popup = ({ open, onClose, position, content }) => {
-  const { title, description, image, link } = content;
-
   const modalWidth = 320;
-  const modalHeight = image ? 400 : 200;
+  const modalHeight = 400;
 
   useEffect(() => {
     if (open && position) {
@@ -52,7 +50,8 @@ const Popup = ({ open, onClose, position, content }) => {
       if (modalContainer) {
         modalContainer.style.position = "absolute";
 
-        const mapContainerRect = modalContainer.parentElement.getBoundingClientRect();
+        const mapContainerRect =
+          modalContainer.parentElement.getBoundingClientRect();
 
         let top = position.y;
         let left = position.x;
@@ -66,24 +65,28 @@ const Popup = ({ open, onClose, position, content }) => {
 
         modalContainer.style.top = `${top}px`;
         modalContainer.style.left = `${left}px`;
-
       }
     }
   }, [open, position]);
 
   return (
     <StyledModal open={open} onCancel={onClose} footer={null}>
-      {image && (
-        <ImageWrapper>
-          <img src={image} alt={title} />
-        </ImageWrapper>
-      )}
-      <ContentWrapper>
-        <Title level={4}>
-          {title} <Link href={link}>See Details</Link>
-        </Title>
-        <Text>{description}</Text>
-      </ContentWrapper>
+      {content.map((post, index) => (
+        <div key={index}>
+          {post.image && (
+            <ImageWrapper>
+              <img src={post.image} alt={post.title} />
+            </ImageWrapper>
+          )}
+          <ContentWrapper>
+            <Title level={4}>
+              {post.title} <Link href={post.link}>See Details</Link>
+            </Title>
+            <Text>{post.description}</Text>
+          </ContentWrapper>
+          {index < content.length - 1 && <Divider />}
+        </div>
+      ))}
     </StyledModal>
   );
 };

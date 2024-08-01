@@ -24,7 +24,7 @@ const Map = () => {
     if (map.current) return;
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
-      style: 'mapbox://styles/mapbox/streets-v12',
+      style: "mapbox://styles/mapbox/streets-v12",
       center: [longitude, latitude],
       zoom: 12
     });
@@ -36,23 +36,32 @@ const Map = () => {
     const link = selection == "products" ? "product" : "pet";
     const data = selection == "products" ? products : pets;
     const newMarkers = [];
-    data.forEach((post) => {
-      const marker = new mapboxgl.Marker({color: 'var(--color-brand-100)'})
-        .setLngLat([post.longitude, post.latitude])
+
+    const groupData = data.reduce((acc, item) => {
+      const key = `${item.latitude},${item.longitude}`;
+      if (!acc[key]) acc[key] = [];
+      acc[key].push(item);
+      return acc;
+    }, {});
+
+    Object.keys(groupData).forEach((key) => {
+      const posts = groupData[key];
+      const [latitude, longitude] = key.split(",").map(Number);
+      const marker = new mapboxgl.Marker({ color: "var(--color-brand-100)" })
+        .setLngLat([longitude, latitude])
         .addTo(map.current);
 
       marker.getElement().addEventListener("click", (e) => {
         e.stopPropagation();
-        const popupContent = {
+        const popupContent = posts.map((post) => ({
           title: post.title || post.pet_name,
           description:
             post.content ||
             `${post.pet_type}, ${post.breed}, ${post.pet_address}`,
-          link: `/${link}/${post.id}`
-        };
-        if (link == "pet") {
-          popupContent.image = post.image ? post.image.split(",")[0] : null;
-        }
+          link: `/${link}/${post.id}`,
+          image: link === "pet" && post.image ? post.image.split(",")[0] : null
+        }));
+
         setPopupContent(popupContent);
         setPosition({
           x: e.pageX,
