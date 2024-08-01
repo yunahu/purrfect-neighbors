@@ -81,8 +81,8 @@ function DMs() {
   useEffect(() => {
     const onNewMessage = (newMsg) => {
       if (
-        newMsg.senderId === chat.recipient.id ||
-        newMsg.senderId === chat.sender.id
+        newMsg.senderId === chat?.recipient.id ||
+        newMsg.senderId === chat?.sender.id
       ) {
         const { messages, ...rest } = chat;
         const newMessages = [...messages, newMsg];
@@ -95,7 +95,6 @@ function DMs() {
               : chat
           );
         });
-        console.log(chats);
       }
     };
 
