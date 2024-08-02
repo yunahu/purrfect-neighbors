@@ -14,6 +14,7 @@ import { useEffect, useState } from "react";
 import { FaCat, FaPaw } from "react-icons/fa";
 import { LuMapPin, LuUpload, LuX } from "react-icons/lu";
 import { useNavigate } from "react-router-dom";
+import { useSearch } from "../context/useSearch";
 import styled from "styled-components";
 
 import ContentBox from "../components/ContentBox";
@@ -81,6 +82,7 @@ const StyledSelect = styled(Select)`
 
 function PlaceAdoption() {
   const navigate = useNavigate();
+  const { setGeolocation, setFilter } = useSearch();
   const types = animal.types;
   const breedOptions = animal.breeds;
 
@@ -129,6 +131,10 @@ function PlaceAdoption() {
         message.success("Pet placed for adoption!");
 
         form.resetFields();
+
+        setGeolocation((prev) => ({...prev, latitude: location.latitude, longitude: location.longitude}));
+        setFilter((prev) => ({ ...prev, selection:"pets" }));
+
         setLocation({ latitude: null, longitude: null });
         setImageUrl(null);
 

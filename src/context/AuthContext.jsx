@@ -10,7 +10,7 @@ const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     const run = async () => {
-      const response = await fetch("http://localhost:3000/user", {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/user`, {
         credentials: "include"
       });
       if (response.status === 200) {
@@ -29,14 +29,14 @@ const AuthProvider = ({ children }) => {
   }, []);
 
   const logout = async () => {
-    await fetch("http://localhost:3000/logout", {
+    await fetch(`${import.meta.env.VITE_BACKEND_URL}/logout`, {
       credentials: "include"
     });
     setUser(null);
   };
 
   const updateUsername = async (newUsername) => {
-    const response = await fetch("http://localhost:3000/user/update", {
+    const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/user/update`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
