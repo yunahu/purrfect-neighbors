@@ -53,7 +53,7 @@ function SearchBar() {
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
       if (value.trim() !== "" && value.trim() !== searchTerm) {
-        console.log(value);
+        // console.log(value);
         setSearchTerm(value);
         setIsVisible(true);
       }

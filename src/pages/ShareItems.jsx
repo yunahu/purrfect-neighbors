@@ -1,11 +1,10 @@
-import React, { useState } from "react";
-
-import { Button, Flex, Form, Input, Tooltip, Typography, message } from "antd";
+import { Button, Flex, Form, Input, message, Tooltip, Typography } from "antd";
+import { useState } from "react";
 import { LuMapPin } from "react-icons/lu";
+import { useNavigate } from "react-router-dom";
+import styled from "styled-components";
 
 import ContentBox from "../components/ContentBox";
-
-import styled from "styled-components";
 
 const { Title, Text } = Typography;
 
@@ -24,6 +23,7 @@ const StyledText = styled(Text)`
 `;
 
 function ShareItems() {
+  const navigate = useNavigate();
   const [form] = Form.useForm();
   const [location, setLocation] = useState({ latitude: null, longitude: null });
 
@@ -34,24 +34,27 @@ function ShareItems() {
     }
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/donations/create`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify(values),
-      });
+      const response = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/donations/create`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          credentials: "include",
+          body: JSON.stringify(values)
+        }
+      );
 
       if (response.ok) {
         message.success("Item shared successfully!");
         form.resetFields();
         setLocation({ latitude: null, longitude: null });
 
+        navigate("/explore");
       } else {
         message.error("Failed to share item. Please try again later.");
       }
-
     } catch (error) {
       message.error("An error occurred. Please try again.");
     }
@@ -59,7 +62,6 @@ function ShareItems() {
 
   const handleAddLocation = async () => {
     if (navigator.geolocation) {
-
       try {
         const position = await new Promise((resolve, reject) => {
           navigator.geolocation.getCurrentPosition(resolve, reject);
@@ -73,7 +75,6 @@ function ShareItems() {
       } catch (error) {
         message.error("Unable to retrieve your location.");
       }
-
     } else {
       message.error("Geolocation is not supported by your browser.");
     }
@@ -121,7 +122,8 @@ function ShareItems() {
               <LocationDisplay>
                 {location.latitude && location.longitude ? (
                   <StyledText>
-                    <LuMapPin /> Latitude: {location.latitude}, Longitude: {location.longitude}
+                    <LuMapPin /> Latitude: {location.latitude}, Longitude:{" "}
+                    {location.longitude}
                   </StyledText>
                 ) : (
                   <Tooltip title="Add location">
@@ -138,8 +140,7 @@ function ShareItems() {
                 )}
               </LocationDisplay>
               <Tooltip title="Submit">
-            
-              <Button
+                <Button
                   type="primary"
                   htmlType="submit"
                   shape="round"

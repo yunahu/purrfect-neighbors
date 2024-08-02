@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { Badge, Divider, Tabs, Typography, Spin, message } from "antd";
+import { Badge, Divider, message, Spin, Tabs, Typography } from "antd";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
@@ -23,15 +23,21 @@ function Messages() {
   const [commentsData, setCommentsData] = useState([]);
   const [loadingComments, setLoadingComments] = useState(true);
 
-  const comments = loadingComments ? <Spin/> : (commentsData.map((comment, i) => (
-    <li key={comment.id}>
-      <Item onClick={() => handleCommentClick(comment.id, comment.post_id)}>
-        <Title level={3}>{comment.post_title}</Title>
-        <p>{comment.content}</p>
-      </Item>
-      {i < commentsData.length - 1 && <Divider />}
-    </li>
-  )));
+  const comments = loadingComments ? (
+    <Spin />
+  ) : commentsData.length === 0 ? (
+    <p>No new comments.</p>
+  ) : (
+    commentsData.map((comment, i) => (
+      <li key={comment.id}>
+        <Item onClick={() => handleCommentClick(comment.id, comment.post_id)}>
+          <Title level={3}>{comment.post_title}</Title>
+          <p>{comment.content}</p>
+        </Item>
+        {i < commentsData.length - 1 && <Divider />}
+      </li>
+    ))
+  );
 
   const items = [
     {
@@ -48,14 +54,17 @@ function Messages() {
 
   const handleCommentClick = async (commentId, postId) => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/user/notifications/read`, {
-        method: "PATCH",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ commentId }),
-      });
+      const response = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/user/notifications/read`,
+        {
+          method: "PATCH",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ commentId })
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Failed to mark comment as read.");
@@ -79,7 +88,7 @@ function Messages() {
         );
 
         if (!response.ok) {
-          throw new Error('Failed to fetch comments.');
+          throw new Error("Failed to fetch comments.");
         }
 
         const data = await response.json();

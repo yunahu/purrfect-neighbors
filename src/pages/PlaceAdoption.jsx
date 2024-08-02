@@ -1,12 +1,22 @@
-import React, { useState, useEffect } from "react";
-
-import { Button, Flex, Form, Input, Tooltip, Typography, Upload, Image, Select, message } from "antd";
-import { LuMapPin, LuUpload, LuX } from "react-icons/lu";
+import {
+  Button,
+  Flex,
+  Form,
+  Image,
+  Input,
+  message,
+  Select,
+  Tooltip,
+  Typography,
+  Upload
+} from "antd";
+import { useEffect, useState } from "react";
 import { FaCat, FaPaw } from "react-icons/fa";
+import { LuMapPin, LuUpload, LuX } from "react-icons/lu";
+import { useNavigate } from "react-router-dom";
+import styled from "styled-components";
 
 import ContentBox from "../components/ContentBox";
-
-import styled from "styled-components";
 import animal from "../data/animal.json";
 
 const { Title, Text } = Typography;
@@ -50,7 +60,7 @@ const StyledImage = styled(Image)`
   width: 20rem !important;
   height: 20rem !important;
   object-fit: cover;
-`
+`;
 
 const CenteredDiv = styled.div`
   height: 100%;
@@ -70,6 +80,7 @@ const StyledSelect = styled(Select)`
 `;
 
 function PlaceAdoption() {
+  const navigate = useNavigate();
   const types = animal.types;
   const breedOptions = animal.breeds;
 
@@ -120,6 +131,8 @@ function PlaceAdoption() {
         form.resetFields();
         setLocation({ latitude: null, longitude: null });
         setImageUrl(null);
+
+        navigate("/explore");
       } else {
         message.error("Failed to place adoption. Please try again later.");
       }
@@ -130,7 +143,6 @@ function PlaceAdoption() {
 
   const handleAddLocation = async () => {
     if (navigator.geolocation) {
-
       try {
         const position = await new Promise((resolve, reject) => {
           navigator.geolocation.getCurrentPosition(resolve, reject);
@@ -145,7 +157,6 @@ function PlaceAdoption() {
       } catch (error) {
         message.error("Unable to retrieve your location.");
       }
-
     } else {
       message.error("Geolocation is not supported by your browser.");
     }
@@ -155,8 +166,8 @@ function PlaceAdoption() {
     setUploading(true);
 
     const formData = new FormData();
-    formData.append('file', file);
-  
+    formData.append("file", file);
+
     try {
       const response = await fetch(
         `${import.meta.env.VITE_BACKEND_URL}/pets/upload`,
@@ -194,7 +205,10 @@ function PlaceAdoption() {
               <Form.Item
                 name="name"
                 rules={[
-                  { required: true, message: "Please input the name of the pet." }
+                  {
+                    required: true,
+                    message: "Please input the name of the pet."
+                  }
                 ]}
               >
                 <Input
@@ -224,8 +238,13 @@ function PlaceAdoption() {
                   <StyledSelect
                     placeholder="Type (optional)"
                     suffixIcon={<FaCat />}
-                    onChange={(value) => {setType(value)}}
-                    options={types?.map((type) => ({ value: type, label: type }))}
+                    onChange={(value) => {
+                      setType(value);
+                    }}
+                    options={types?.map((type) => ({
+                      value: type,
+                      label: type
+                    }))}
                     allowClear
                   />
                 </Form.Item>
@@ -233,7 +252,10 @@ function PlaceAdoption() {
                   <StyledSelect
                     placeholder="Breed (optional)"
                     suffixIcon={<FaPaw />}
-                    options={breeds?.map((breed) => ({ value: breed, label: breed }))}
+                    options={breeds?.map((breed) => ({
+                      value: breed,
+                      label: breed
+                    }))}
                     allowClear
                   />
                 </Form.Item>
@@ -249,7 +271,9 @@ function PlaceAdoption() {
                       icon={<LuX />}
                       shape="round"
                       aria-label="Click to remove image."
-                      onClick={() => {setImageUrl(null)}}
+                      onClick={() => {
+                        setImageUrl(null);
+                      }}
                     >
                       Remove
                     </Button>
@@ -262,12 +286,11 @@ function PlaceAdoption() {
                       customRequest={({ file }) => handleUpload(file)}
                       accept="image/*"
                     >
-                      <StyledButton
-                        icon={<LuUpload />}
-                        loading={uploading}
-                      />
+                      <StyledButton icon={<LuUpload />} loading={uploading} />
                     </Upload>
-                    <Text type="danger" style={{ marginTop: '5px' }}>*Do not include private info in uploaded images.</Text>
+                    <Text type="danger" style={{ marginTop: "5px" }}>
+                      *Do not include private info in uploaded images.
+                    </Text>
                   </>
                 )}
               </CenteredDiv>
@@ -287,7 +310,8 @@ function PlaceAdoption() {
               <LocationDisplay>
                 {location.latitude && location.longitude ? (
                   <StyledText>
-                    <LuMapPin /> Latitude: {location.latitude}, Longitude: {location.longitude}
+                    <LuMapPin /> Latitude: {location.latitude}, Longitude:{" "}
+                    {location.longitude}
                   </StyledText>
                 ) : (
                   <Tooltip title="Add location">
