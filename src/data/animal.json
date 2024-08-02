@@ -1,9 +1,29 @@
 {
   "types": ["Cat", "Dog", "Bird", "Rabbit", "Hamster"],
   "breeds": {
-    "Cat": ["Siamese", "Persian", "Maine Coon", "Ragdoll", "Bengal"],
-    "Dog": ["Golden Retriever"],
-    "Bird": ["Parakeet"],
+    "Cat": [
+      "British Shorthair",
+      "Siamese",
+      "Bengal",
+      "Maine Coon",
+      "Ragdoll",
+      "Abyssinian",
+      "Persian",
+      "Burmese",
+      "Sphynx"
+    ],
+    "Dog": [
+      "Labrador Retriever",
+      "German Shepherd",
+      "Poodle",
+      "Border Collie",
+      "Boxer",
+      "Golden Retriever",
+      "Beagle",
+      "Dachshund",
+      "Pug"
+    ],
+    "Bird": ["Parakeet", "Canary"],
     "Rabbit": ["Holland Lop"],
     "Hamster": ["Syrian"]
   }
