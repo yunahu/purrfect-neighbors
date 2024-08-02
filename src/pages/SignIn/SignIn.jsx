@@ -1,10 +1,12 @@
 import { Link } from "react-router-dom";
-import logo from "src/assets/images/googleLogo.svg";
+import googlelogo from "src/assets/images/googleLogo.svg";
 import styled from "styled-components";
 
+import Logo from "../../components/Logo";
+
 const Container = styled.div`
-  height: 100%;
-  background-color: ${(props) => props.theme.lightGrey};
+  height: 100vh;
+  background-color: var(--color-grey-50);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -14,7 +16,7 @@ const Card = styled.div`
   width: 400px;
   height: 200px;
   border-radius: 30px;
-  border: 1px solid ${(props) => props.theme.darkGrey};
+  border: 1px solid var(--color-grey-400);
   background: white;
   display: flex;
   flex-direction: column;
@@ -22,8 +24,7 @@ const Card = styled.div`
 `;
 
 const StyledDiv = styled.div`
-  font-size: 20px;
-  padding: 29px 0px;
+  padding: 3rem 0 1rem;
 `;
 
 const GoogleButton = styled.button`
@@ -40,7 +41,7 @@ const GoogleButton = styled.button`
   cursor: pointer;
 `;
 
-const Logo = styled.img`
+const GLogo = styled.img`
   position: absolute;
   left: 13px;
 `;
@@ -53,9 +54,11 @@ const SignIn = () => {
   return (
     <Container>
       <Card>
-        <StyledDiv>PurrFect Neighbors</StyledDiv>
+        <StyledDiv>
+          <Logo />
+        </StyledDiv>
         <GoogleButton onClick={signInWithGoogle}>
-          <Logo src={logo} />
+          <GLogo src={googlelogo} />
           Sign In With Google
         </GoogleButton>
       </Card>

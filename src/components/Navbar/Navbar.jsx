@@ -1,11 +1,24 @@
-import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import styled from "styled-components";
+
+import { useAuth } from "../../context/useAuth";
+import SearchBar from "../SearchBar";
 
 const Container = styled.div`
   height: 80px;
-  border-bottom: 1px solid ${(props) => props.theme.grey};
+  border-bottom: 1px solid var(--color-grey-100);
   position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 0 20px;
+`;
+
+const User = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 20px;
 `;
 
 const SignInOutButton = styled.button`
@@ -15,68 +28,47 @@ const SignInOutButton = styled.button`
     props.$color === "black" ? "black" : "white"};
   border-radius: 20px;
   color: ${(props) =>
-    props.$color === "black" ? "white" : props.theme.darkGrey};
+    props.$color === "black" ? "white" : "var(--color-grey-400)"};
   border: ${(props) =>
-    props.$color === "black" ? "none" : `1px solid ${props.theme.darkGrey}`};
+    props.$color === "black" ? "none" : `1px solid var(--color-grey-400)`};
   display: flex;
   align-items: center;
-  position: absolute;
-  right: 100px;
   justify-content: center;
   font-size: 16px;
   cursor: pointer;
 `;
 
 const UserLink = styled(Link)`
-  position: absolute;
-  top: 25px;
-  right: 300px;
   text-decoration: underline;
 `;
 
 const Navbar = () => {
-  const [user, setUser] = useState(null);
+  const navigate = useNavigate();
+  const { user, logout } = useAuth();
+  const username = user ? user.name : "Guest";
 
-  useEffect(() => {
-    const run = async () => {
-      const response = await fetch("http://localhost:3000/user", {
-        credentials: "include"
-      });
-      if (response.status === 200) {
-        const resp = await response.json();
-        setUser(resp);
-      }
-    };
-
-    run();
-  }, []);
-
-  const logout = async () => {
-    const response = await fetch("http://localhost:3000/logout", {
-      credentials: "include"
-    });
-    setUser(null);
+  const handleSignOut = () => {
+    logout();
+    navigate("/");
   };
-
-  const getFirstName = (fullname) =>
-    fullname.substring(0, user.name.indexOf(" "));
 
   return (
     <Container>
-      Navbar
-      <UserLink to={user ? "/userProfile" : "/guest"}>
-        {user ? getFirstName(user.name) : "Guest"}
-      </UserLink>
-      {!user && (
-        <Link to="/signin">
-          <SignInOutButton $color="black">Sign In</SignInOutButton>
-        </Link>
-      )}
-      {user && (
-        <SignInOutButton onClick={logout} $color="white">
-          Sign Out
-        </SignInOutButton>
-      )}
+      <SearchBar />
+      <User>
+        <UserLink to={user ? "/profile" : "/signin"}>
+          {username.toUpperCase()}
+        </UserLink>
+        {user ? (
+          <SignInOutButton onClick={handleSignOut} $color="white">
+            Sign Out
+          </SignInOutButton>
+        ) : (
+          <Link to="/signin">
+            <SignInOutButton $color="black">Sign In</SignInOutButton>
+          </Link>
+        )}
+      </User>
     </Container>
   );
 };

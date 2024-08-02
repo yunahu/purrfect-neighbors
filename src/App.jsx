@@ -1,43 +1,24 @@
-import Footer from "src/components/Footer/Footer";
-import Navbar from "src/components/Navbar/Navbar";
+import { Helmet } from "react-helmet";
 import Router from "src/Router/Router";
-import styled, { createGlobalStyle } from "styled-components";
+import GlobalStyle from "src/theme/GlobalStyles";
 
-const GlobalStyle = createGlobalStyle`
-	* {
-		box-sizing: border-box;
-	}
-
-	body {
-		margin: 0px;
-	}	
-	
-	a {
-		color: inherit;
-		text-decoration: none;
-	}
-`;
-
-const Container = styled.div`
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-`;
-
-const Content = styled.main`
-  flex-grow: 1;
-`;
+import { AuthProvider } from "./context/AuthContext";
+import { SearchProvider } from "./context/SearchContext";
 
 const App = () => {
   return (
-    <Container>
-      <GlobalStyle />
-      <Navbar />
-      <Content>
+    <SearchProvider>
+      <AuthProvider>
+        <Helmet>
+          <link
+            href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap"
+            rel="stylesheet"
+          />
+        </Helmet>
+        <GlobalStyle />
         <Router />
-      </Content>
-      <Footer />
-    </Container>
+      </AuthProvider>
+    </SearchProvider>
   );
 };
 
