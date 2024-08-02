@@ -24,7 +24,7 @@ const defaultOptions = {
 };
 
 const link = createHttpLink({
-  uri: "http://localhost:3000/graphql",
+  uri: `${import.meta.env.VITE_BACKEND_URL}/graphql`,
   credentials: "include"
 });
 

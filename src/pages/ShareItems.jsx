@@ -2,6 +2,7 @@ import { Button, Flex, Form, Input, message, Tooltip, Typography } from "antd";
 import { useState } from "react";
 import { LuMapPin } from "react-icons/lu";
 import { useNavigate } from "react-router-dom";
+import { useSearch } from "../context/useSearch";
 import styled from "styled-components";
 
 import ContentBox from "../components/ContentBox";
@@ -24,6 +25,7 @@ const StyledText = styled(Text)`
 
 function ShareItems() {
   const navigate = useNavigate();
+  const { setGeolocation, setFilter } = useSearch();
   const [form] = Form.useForm();
   const [location, setLocation] = useState({ latitude: null, longitude: null });
 
@@ -49,6 +51,10 @@ function ShareItems() {
       if (response.ok) {
         message.success("Item shared successfully!");
         form.resetFields();
+
+        setGeolocation((prev) => ({...prev, latitude: location.latitude, longitude: location.longitude}));
+        setFilter((prev) => ({ ...prev, selection:"products" }));
+
         setLocation({ latitude: null, longitude: null });
 
         navigate("/explore");

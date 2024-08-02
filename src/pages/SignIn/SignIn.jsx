@@ -48,7 +48,7 @@ const GLogo = styled.img`
 
 const SignIn = () => {
   const signInWithGoogle = () => {
-    window.open("http://localhost:3000/login/federated/google", "_self");
+    window.open(`${import.meta.env.VITE_BACKEND_URL}/login/federated/google`, "_self");
   };
 
   return (
