@@ -1,5 +1,5 @@
-import { Badge, Divider, message, Tabs, Typography } from "antd";
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
+import { Badge, Divider, Tabs, Typography, Spin, message } from "antd";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
@@ -18,10 +18,12 @@ const Item = styled.div`
 `;
 
 function Messages() {
-  const [commentsData, setCommentsData] = useState([]);
   const navigate = useNavigate();
 
-  const comments = commentsData.map((comment, i) => (
+  const [commentsData, setCommentsData] = useState([]);
+  const [loadingComments, setLoadingComments] = useState(true);
+
+  const comments = loadingComments ? <Spin/> : (commentsData.map((comment, i) => (
     <li key={comment.id}>
       <Item onClick={() => handleCommentClick(comment.id, comment.post_id)}>
         <Title level={3}>{comment.post_title}</Title>
@@ -29,7 +31,7 @@ function Messages() {
       </Item>
       {i < commentsData.length - 1 && <Divider />}
     </li>
-  ));
+  )));
 
   const items = [
     {
@@ -46,20 +48,17 @@ function Messages() {
 
   const handleCommentClick = async (commentId, postId) => {
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_BACKEND_URL}/user/notifications/read`,
-        {
-          method: "POST",
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({ commentId })
-        }
-      );
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/user/notifications/read`, {
+        method: "PATCH",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ commentId }),
+      });
 
       if (!response.ok) {
-        throw new Error("Failed to mark comment as read");
+        throw new Error("Failed to mark comment as read.");
       }
 
       navigate(`/product/${postId}`);
@@ -80,13 +79,15 @@ function Messages() {
         );
 
         if (!response.ok) {
-          throw new Error("Failed to fetch posts");
+          throw new Error('Failed to fetch comments.');
         }
 
         const data = await response.json();
         setCommentsData(data);
       } catch (error) {
-        console.error(error);
+        message.error("Unable to fetch comment notifications.");
+      } finally {
+        setLoadingComments(false);
       }
     };
 

@@ -1,11 +1,5 @@
 import { Badge } from "antd";
-import {
-  LuBellRing,
-  LuCat,
-  LuGift,
-  LuHeart,
-  LuUserCircle2
-} from "react-icons/lu";
+import { LuBellRing, LuCat, LuGift, LuUserCircle2, LuFootprints } from "react-icons/lu";
 import { NavLink } from "react-router-dom";
 import styled from "styled-components";
 
@@ -78,13 +72,13 @@ function Sidebar() {
         <NavList>
           <li>
             <StyledNavLink to="/explore">
-              <LuCat />
+              <LuFootprints />
               <span>Explore</span>
             </StyledNavLink>
           </li>
           <li>
             <StyledNavLink to="/adoption">
-              <LuHeart />
+              <LuCat />
               <span>Place Adoption</span>
             </StyledNavLink>
           </li>

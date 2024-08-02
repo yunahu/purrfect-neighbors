@@ -24,7 +24,7 @@ const Map = () => {
     if (map.current) return;
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
-      style: "mapbox://styles/mapbox/streets-v12",
+      style: 'mapbox://styles/mapbox/streets-v12',
       center: [longitude, latitude],
       zoom: 12
     });
@@ -37,7 +37,7 @@ const Map = () => {
     const data = selection == "products" ? products : pets;
     const newMarkers = [];
     data.forEach((post) => {
-      const marker = new mapboxgl.Marker()
+      const marker = new mapboxgl.Marker({color: 'var(--color-brand-100)'})
         .setLngLat([post.longitude, post.latitude])
         .addTo(map.current);
 

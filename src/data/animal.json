@@ -1,0 +1,10 @@
+{
+  "types": ["Cat", "Dog", "Bird", "Rabbit", "Hamster"],
+  "breeds": {
+    "Cat": ["Siamese", "Persian", "Maine Coon", "Ragdoll", "Bengal"],
+    "Dog": ["Golden Retriever"],
+    "Bird": ["Parakeet"],
+    "Rabbit": ["Holland Lop"],
+    "Hamster": ["Syrian"]
+  }
+}

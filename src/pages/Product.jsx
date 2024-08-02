@@ -1,9 +1,11 @@
-import { Button, Divider, Input, Space, Tooltip, Typography, message } from "antd";
+import { Button, Divider, Input, Space, Tooltip, Typography, Spin, message } from "antd";
 import { formatDistanceToNow, parseISO } from "date-fns";
 import { useState, useEffect } from "react";
 import { LuArrowUp, LuMapPin } from "react-icons/lu";
 import { useNavigate, useParams } from "react-router-dom";
 import styled from "styled-components";
+
+import { useSearch } from "../context/useSearch"
 
 import Back from "../components/Back";
 import ContentBox from "../components/ContentBox";
@@ -25,31 +27,17 @@ const Comment = styled.div`
 
 function Product() {
   const navigate = useNavigate();
+  const { setGeolocation, setFilter } = useSearch();
   const { id } = useParams();
   const { user } = useAuth();
 
   const currentUser = user ? user.name : "Guest";
+
+  const [loading, setLoading] = useState(true);
+
   const [comment, setComment] = useState("");
 
-  const [post, setPost] = useState({
-    title: "Post 1",
-    description: "Content of Post 1",
-    postBy: "User 1",
-    postDate: "2024-07-01T00:00:00Z",
-    location: "Vancouver, BC",
-    comments: [
-      {
-        commentBy: "User 2",
-        commentDate: "2024-07-02T00:00:00Z",
-        content: "Comment 1"
-      },
-      {
-        commentBy: "User 3",
-        commentDate: "2024-07-03T00:00:00Z",
-        content: "Comment 2"
-      }
-    ]
-  });
+  const [post, setPost] = useState();
 
   useEffect(() => {
     const fetchPost = async () => {
@@ -62,13 +50,13 @@ function Product() {
         setPost(data);
       } catch (error) {
         message.error("Failed to load post.");
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchPost();
   }, [id]);
-
-  const { title, description, postBy, postDate, location, comments } = post;
 
   const timeAgo = (date) => {
     if (!date) return null;
@@ -94,16 +82,19 @@ function Product() {
       });
 
       if (response.ok) {
+        const data = await response.json();
+
         const newComment = {
+          id: data.commentId,
           commentBy: currentUser,
           commentDate: new Date().toISOString(),
           content: comment
         };
 
-        setPost({
-          ...post,
-          comments: [...comments, newComment]
-        });
+        setPost((prevPost) => ({
+          ...prevPost,
+          comments: [...prevPost.comments, newComment]
+        }));
         setComment("");
         message.success("Comment submitted successfully!");
       } else {
@@ -114,6 +105,14 @@ function Product() {
     }
   };
 
+  const handleMapPinClick = () => {
+    if (post) {
+      setGeolocation((prev) => ({...prev, latitude: post.latitude, longitude: post.longitude}));
+      setFilter((prev) => ({ ...prev, selection:"products" }));
+      navigate(`/explore`);
+    }
+  };
+
   return (
     <>
       <Space size="middle">
@@ -121,53 +120,60 @@ function Product() {
         <Title level={1}>Pet Product</Title>
       </Space>
       <ContentBox>
-        <Space direction="vertical">
-          <Title level={2}>
-            {id}: {title}
-          </Title>
-          <Space>
-            <UserAvatar size="large" name={postBy} />
-            <Title level={5}>{postBy}</Title>
-            <Text type="secondary">{timeAgo(postDate)}</Text>
+        { loading ? <Spin/> 
+        : 
+        ( post ? <>
+          <Space direction="vertical">
+            <Title level={2}>
+              {id}: {post.title}
+            </Title>
+            <Space>
+              <UserAvatar size="large" name={post.postBy} />
+              <Title level={5}>{post.postBy}</Title>
+              <Text type="secondary">{timeAgo(post.postDate)}</Text>
+            </Space>
+            <Text>{post.description}</Text>
+            <Text type="secondary" onClick={handleMapPinClick} style={{ cursor: 'pointer' }} >
+              <LuMapPin /> {post.location}
+            </Text>
           </Space>
-          <Text>{description}</Text>
-          <Text type="secondary">
-            <LuMapPin /> {location}
-          </Text>
-        </Space>
-        <Space direction="vertical">
-          <Input
-            placeholder="Add a comment"
-            size="large"
-            value={comment}
-            onChange={(e) => setComment(e.target.value)}
-            suffix={
-              <Tooltip title="Submit comment">
-                <Button
-                  icon={<LuArrowUp />}
-                  aria-label="Click to submit comment"
-                  onClick={handleSubmitComment}
-                  disabled={comment === null || comment.trim() === ""}
-                />
-              </Tooltip>
-            }
-          />
-          {comments.map((comment) => (
-            <>
-              <Divider style={{ margin: "12px 0" }} />
-              <Comment key={comment.commentDate}>
-                <UserAvatar name={comment.commentBy} gap={8} />
-                <Space direction="vertical">
-                  <Space>
-                    <Text>{comment.commentBy}</Text>
-                    <Text type="secondary">{timeAgo(comment.commentDate)}</Text>
+          <Space direction="vertical">
+            <Input
+              placeholder="Add a comment"
+              size="large"
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
+              suffix={
+                <Tooltip title="Submit comment">
+                  <Button
+                    icon={<LuArrowUp />}
+                    aria-label="Click to submit comment"
+                    onClick={handleSubmitComment}
+                    disabled={comment === null || comment.trim() === ""}
+                  />
+                </Tooltip>
+              }
+            />
+            {post.comments.map((comment) => (
+              <div key={comment.id}>
+                <Divider style={{ margin: "12px 0" }} />
+                <Comment>
+                  <UserAvatar name={comment.commentBy} gap={8} />
+                  <Space direction="vertical">
+                    <Space>
+                      <Text>{comment.commentBy}</Text>
+                      <Text type="secondary">{timeAgo(comment.commentDate)}</Text>
+                    </Space>
+                    <Text>{comment.content}</Text>
                   </Space>
-                  <Text>{comment.content}</Text>
-                </Space>
-              </Comment>
-            </>
-          ))}
-        </Space>
+                </Comment>
+              </div>
+            ))}
+          </Space>
+        </>
+        :
+        <Text type="danger">Failed to load post.</Text>
+        )}
       </ContentBox>
     </>
   );

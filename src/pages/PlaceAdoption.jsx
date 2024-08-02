@@ -1,25 +1,94 @@
-import {
-  Button,
-  Flex,
-  Form,
-  Input,
-  message,
-  Tooltip,
-  Typography,
-  Upload
-} from "antd";
-import { useState } from "react";
-import { LuMapPin, LuUpload } from "react-icons/lu";
+import React, { useState, useEffect } from "react";
+
+import { Button, Flex, Form, Input, Tooltip, Typography, Upload, Image, Select, message } from "antd";
+import { LuMapPin, LuUpload, LuX } from "react-icons/lu";
+import { FaCat, FaPaw } from "react-icons/fa";
 
 import ContentBox from "../components/ContentBox";
 
-const { Title } = Typography;
+import styled from "styled-components";
+import animal from "../data/animal.json";
+
+const { Title, Text } = Typography;
+
+const FormColumn = styled(Flex)`
+  width: 100%;
+  flex-direction: column;
+  gap: 1rem;
+`;
+
+const LocationDisplay = styled.div`
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+`;
+
+const StyledText = styled(Text)`
+  color: var(--color-brand-100);
+  margin-left: 1.75rem;
+  svg {
+    margin-right: 0.5rem;
+  }
+`;
+
+const StyledButton = styled(Button)`
+  color: var(--color-brand-100);
+  background-color: white;
+  border: 1px solid var(--color-brand-100);
+  border-radius: 20px !important;
+  width: 20rem !important;
+  height: 20rem;
+  font-size: 50px;
+  &:hover {
+    background-color: var(--color-brand-100);
+    color: white;
+  }
+`;
+
+const StyledImage = styled(Image)`
+  border-radius: 20px;
+  width: 20rem !important;
+  height: 20rem !important;
+  object-fit: cover;
+`
+
+const CenteredDiv = styled.div`
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+`;
+
+const StyledFlex = styled(Flex)`
+  width: 100%;
+  gap: 1rem;
+`;
+
+const StyledSelect = styled(Select)`
+  width: 27rem !important;
+`;
 
 function PlaceAdoption() {
+  const types = animal.types;
+  const breedOptions = animal.breeds;
+
   const [form] = Form.useForm();
   const [location, setLocation] = useState({ latitude: null, longitude: null });
   const [imageUrl, setImageUrl] = useState(null);
   const [uploading, setUploading] = useState(false);
+
+  const [type, setType] = useState("");
+  const [breeds, setBreeds] = useState([]);
+
+  useEffect(() => {
+    form.setFieldsValue({ breed: null });
+    if (type) {
+      setBreeds(breedOptions[type]);
+    } else {
+      setBreeds([]);
+    }
+  }, [type]);
 
   const onFinish = async (values) => {
     if (!location.latitude || !location.longitude) {
@@ -46,32 +115,37 @@ function PlaceAdoption() {
       );
 
       if (response.ok) {
-        message.success("Item shared successfully!");
+        message.success("Pet placed for adoption!");
 
         form.resetFields();
         setLocation({ latitude: null, longitude: null });
         setImageUrl(null);
       } else {
-        message.error("Failed to share item. Please try again later.");
+        message.error("Failed to place adoption. Please try again later.");
       }
     } catch (error) {
       message.error("An error occurred. Please try again.");
     }
   };
 
-  const handleAddLocation = () => {
+  const handleAddLocation = async () => {
     if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const { latitude, longitude } = position.coords;
-          setLocation({ latitude, longitude });
-          form.setFieldsValue({ latitude, longitude });
-          message.success("Location added successfully!");
-        },
-        (error) => {
-          message.error("Unable to retrieve your location.");
-        }
-      );
+
+      try {
+        const position = await new Promise((resolve, reject) => {
+          navigator.geolocation.getCurrentPosition(resolve, reject);
+        });
+
+        const { latitude, longitude } = position.coords;
+
+        setLocation({ latitude, longitude });
+        form.setFieldsValue({ latitude, longitude });
+
+        message.success("Location added successfully!");
+      } catch (error) {
+        message.error("Unable to retrieve your location.");
+      }
+
     } else {
       message.error("Geolocation is not supported by your browser.");
     }
@@ -81,12 +155,8 @@ function PlaceAdoption() {
     setUploading(true);
 
     const formData = new FormData();
-    formData.append("file", file);
-
-    for (let [key, value] of formData.entries()) {
-      console.log(`${key}: ${value}`);
-    }
-
+    formData.append('file', file);
+  
     try {
       const response = await fetch(
         `${import.meta.env.VITE_BACKEND_URL}/pets/upload`,
@@ -99,8 +169,10 @@ function PlaceAdoption() {
 
       if (response.ok) {
         const url = await response.text();
+
         setImageUrl(url);
         form.setFieldsValue({ imageUrl: url });
+
         message.success("Image uploaded.");
       } else {
         message.error("Failed to upload image.");
@@ -117,48 +189,90 @@ function PlaceAdoption() {
       <Title level={1}>Place Adoption</Title>
       <ContentBox>
         <Form form={form} onFinish={onFinish}>
-          <Form.Item
-            name="name"
-            rules={[
-              { required: true, message: "Please input the name of the pet." }
-            ]}
-          >
-            <Input
-              size="large"
-              placeholder="Name"
-              aria-label="Name"
-              showCount
-              maxLength={100}
-            />
-          </Form.Item>
-          <Form.Item
-            name="description"
-            rules={[
-              { required: true, message: "Please input the description." }
-            ]}
-          >
-            <Input.TextArea
-              placeholder="Description"
-              rows={4}
-              aria-label="Description"
-              showCount
-              maxLength={1000}
-            />
-          </Form.Item>
-          <Form.Item>
-            <Upload
-              name="file"
-              showUploadList={false}
-              customRequest={({ file }) => handleUpload(file)}
-              accept="image/*"
-            >
-              <Button
-                icon={<LuUpload />}
-                loading={uploading}
-                shape="round"
-              ></Button>
-            </Upload>
-          </Form.Item>
+          <StyledFlex>
+            <FormColumn>
+              <Form.Item
+                name="name"
+                rules={[
+                  { required: true, message: "Please input the name of the pet." }
+                ]}
+              >
+                <Input
+                  size="large"
+                  placeholder="Name"
+                  aria-label="Name"
+                  showCount
+                  maxLength={100}
+                />
+              </Form.Item>
+              <Form.Item
+                name="description"
+                rules={[
+                  { required: true, message: "Please input the description." }
+                ]}
+              >
+                <Input.TextArea
+                  placeholder="Description"
+                  rows={4}
+                  aria-label="Description"
+                  showCount
+                  maxLength={1000}
+                />
+              </Form.Item>
+              <StyledFlex>
+                <Form.Item name="type">
+                  <StyledSelect
+                    placeholder="Type (optional)"
+                    suffixIcon={<FaCat />}
+                    onChange={(value) => {setType(value)}}
+                    options={types?.map((type) => ({ value: type, label: type }))}
+                    allowClear
+                  />
+                </Form.Item>
+                <Form.Item name="breed">
+                  <StyledSelect
+                    placeholder="Breed (optional)"
+                    suffixIcon={<FaPaw />}
+                    options={breeds?.map((breed) => ({ value: breed, label: breed }))}
+                    allowClear
+                  />
+                </Form.Item>
+              </StyledFlex>
+            </FormColumn>
+            <FormColumn>
+              <CenteredDiv>
+                {imageUrl ? (
+                  <>
+                    <StyledImage src={imageUrl} alt="Uploaded pet" />
+                    <Button
+                      type="text"
+                      icon={<LuX />}
+                      shape="round"
+                      aria-label="Click to remove image."
+                      onClick={() => {setImageUrl(null)}}
+                    >
+                      Remove
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <Upload
+                      name="file"
+                      showUploadList={false}
+                      customRequest={({ file }) => handleUpload(file)}
+                      accept="image/*"
+                    >
+                      <StyledButton
+                        icon={<LuUpload />}
+                        loading={uploading}
+                      />
+                    </Upload>
+                    <Text type="danger" style={{ marginTop: '5px' }}>*Do not include private info in uploaded images.</Text>
+                  </>
+                )}
+              </CenteredDiv>
+            </FormColumn>
+          </StyledFlex>
           <Form.Item name="imageUrl" hidden>
             <Input type="text" />
           </Form.Item>
@@ -170,27 +284,25 @@ function PlaceAdoption() {
           </Form.Item>
           <Form.Item>
             <Flex justify="space-between">
-              <Tooltip title="Add location">
-                <Button
-                  type="text"
-                  icon={<LuMapPin />}
-                  shape="round"
-                  aria-label="Click to add location"
-                  onClick={handleAddLocation}
-                >
-                  Add Location
-                </Button>
-              </Tooltip>
-              {location.latitude && location.longitude && (
-                <Form.Item>
-                  <Typography.Text>
-                    Latitude: {location.latitude}{" "}
-                  </Typography.Text>
-                  <Typography.Text>
-                    Longitude: {location.longitude}
-                  </Typography.Text>
-                </Form.Item>
-              )}
+              <LocationDisplay>
+                {location.latitude && location.longitude ? (
+                  <StyledText>
+                    <LuMapPin /> Latitude: {location.latitude}, Longitude: {location.longitude}
+                  </StyledText>
+                ) : (
+                  <Tooltip title="Add location">
+                    <Button
+                      type="text"
+                      icon={<LuMapPin />}
+                      shape="round"
+                      aria-label="Click to add location"
+                      onClick={handleAddLocation}
+                    >
+                      Add Location
+                    </Button>
+                  </Tooltip>
+                )}
+              </LocationDisplay>
               <Tooltip title="Submit">
                 <Button
                   type="primary"

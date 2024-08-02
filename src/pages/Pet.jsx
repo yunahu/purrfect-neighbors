@@ -1,7 +1,9 @@
-import { Col, Image, message, Row, Space, Typography } from "antd";
-import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { Col, Image, Row, Space, Typography, Spin, message } from "antd";
+import { useNavigate, useParams } from "react-router-dom";
+import { useState, useEffect } from "react";
 import styled from "styled-components";
+
+import { useSearch } from "../context/useSearch"
 
 import Back from "../components/Back";
 
@@ -40,27 +42,21 @@ const Bio = styled.div`
   font-style: italic;
 `;
 
+const ClickableSpan = styled.span`
+  cursor: pointer;
+`;
+
 function Pet() {
   const { id } = useParams();
+  const navigate = useNavigate();
+  const { setGeolocation, setFilter } = useSearch();
 
-  // Simulate pet bio data
-  const [pet, setPet] = useState({
-    name: "Dapang",
-    type: "Cat",
-    breed: "British Shorthair",
-    location: "Vancouver, BC",
-    image: "https://http.cat/images/200.jpg",
-    contact: {
-      name: "Harry Potter",
-      email: "abc@mail.com",
-      phone: "123-456-7890"
-    },
-    description:
-      "Dapang is a British Shorthair cat. He is 3 years old and loves to play with toys."
-  });
+  const [loading, setLoading] = useState(true);
+
+  const [pet, setPet] = useState();
 
   useEffect(() => {
-    const fetchPost = async () => {
+    const fetchPet = async () => {
       try {
         const response = await fetch(
           `${import.meta.env.VITE_BACKEND_URL}/pets/${id}`
@@ -70,60 +66,63 @@ function Pet() {
         }
         const data = await response.json();
 
-        const fetchedPet = {
-          name: data.title,
-          type: data.type || "Unspecified Type",
-          breed: data.breed || "Unspecified Breed",
-          location: data.location,
-          image: data.imageUrl || "https://http.cat/images/200.jpg",
-          contact: {
-            name: data.postBy,
-            email: data.contactEmail || "abc@mail.com",
-            phone: data.contactPhone || "123-456-7890"
-          },
-          description: data.description
-        };
-
-        setPet(fetchedPet);
+        setPet(data);
       } catch (error) {
-        message.error("Failed to load post.");
+        message.error("Failed to load pet.");
+      } finally {
+        setLoading(false);
       }
     };
 
-    fetchPost();
+    fetchPet();
   }, [id]);
+
+  const handleLocationClick = () => {
+    if (pet) {
+      setGeolocation((prev) => ({...prev, latitude: pet.latitude, longitude: pet.longitude}));
+      setFilter((prev) => ({ ...prev, selection:"pets" }));
+      navigate(`/explore`);
+    }
+  };
 
   return (
     <>
       <Space size="middle">
         <Back />
         <Title level={1}>
-          {pet.name}, {pet.location}
+          {loading ? <></>: (pet && <>{pet.name} <Text><ClickableSpan onClick={handleLocationClick}>{pet.location}</ClickableSpan></Text></>)}
         </Title>
       </Space>
-      <StyledRow>
-        <Col span={24} lg={16}>
-          <Image src={pet.image} alt={pet.name} />
-        </Col>
-        <Col span={24} lg={8}>
-          <Contact>
-            <Title level={2}>Contact</Title>
-            <Text>From: {pet.contact.name}</Text>
-            <Text>Email: {pet.contact.email}</Text>
-            <Text>Phone: {pet.contact.phone}</Text>
-          </Contact>
-        </Col>
-      </StyledRow>
-      <MoreInfo>
-        <Bio>
-          {pet.type} / {pet.breed} / From {pet.location}
-        </Bio>
-        {pet.description}
-        <br />
-        id: {id}
-        <br />
-        Fetch more information about the pet by ID later
-      </MoreInfo>
+      { loading ? 
+        <Spin/> 
+        : 
+        (pet ? 
+        <>
+          <StyledRow>
+            <Col span={24} lg={16}>
+              <Image src={pet.image} alt={pet.name} />
+            </Col>
+            <Col span={24} lg={8}>
+              <Contact>
+                <Title level={2}>Contact</Title>
+                <Text>From: {pet.contact.name}</Text>
+                <Text>Email: {pet.contact.email}</Text>
+              </Contact>
+            </Col>
+          </StyledRow>
+          <MoreInfo>
+            <Bio>
+              {pet.type || "Unspecified Type"} / {pet.breed || "Unspecified Breed"} / From <ClickableSpan onClick={handleLocationClick}>{pet.location}</ClickableSpan>
+            </Bio>
+            {pet.description}
+            <br />
+            id: {id}
+          </MoreInfo>
+        </> 
+        : 
+        <Text type="danger">Pet not found.</Text>
+        )
+      }
     </>
   );
 }

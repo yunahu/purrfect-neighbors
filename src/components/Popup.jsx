@@ -27,6 +27,8 @@ const StyledModal = styled(Modal)`
 
 const ContentWrapper = styled.div`
   padding: 1.6rem;
+  max-height: 120px;
+  overflow: auto;
 `;
 
 const ImageWrapper = styled.div`
@@ -41,13 +43,30 @@ const ImageWrapper = styled.div`
 const Popup = ({ open, onClose, position, content }) => {
   const { title, description, image, link } = content;
 
+  const modalWidth = 320;
+  const modalHeight = image ? 400 : 200;
+
   useEffect(() => {
     if (open && position) {
       const modalContainer = document.querySelector(".ant-modal");
       if (modalContainer) {
         modalContainer.style.position = "absolute";
-        modalContainer.style.top = `${position.y}px`;
-        modalContainer.style.left = `${position.x}px`;
+
+        const mapContainerRect = modalContainer.parentElement.getBoundingClientRect();
+
+        let top = position.y;
+        let left = position.x;
+
+        if (position.x + modalWidth > mapContainerRect.right) {
+          left = mapContainerRect.right - modalWidth;
+        }
+        if (position.y + modalHeight > mapContainerRect.bottom) {
+          top = mapContainerRect.bottom - modalHeight;
+        }
+
+        modalContainer.style.top = `${top}px`;
+        modalContainer.style.left = `${left}px`;
+
       }
     }
   }, [open, position]);
