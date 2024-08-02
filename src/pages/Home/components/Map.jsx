@@ -47,7 +47,7 @@ const Map = () => {
           title: post.title || post.pet_name,
           description:
             post.content ||
-            `${post.pet_type}, ${post.breed}, ${post.pet_address}`,
+            `${post.pet_type || "Unspecified Type"}, ${post.breed || "Unspecified Breed"}, ${post.pet_address || "Unknown Location"}`,
           link: `/${link}/${post.id}`
         };
         if (link == "pet") {
