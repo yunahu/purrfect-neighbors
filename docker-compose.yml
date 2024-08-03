@@ -1,7 +1,11 @@
-version: '3.9'
+version: '3'
 services:
   frontend:
-    build: .
+    build:
+      context: .
+      args:
+        - VITE_MAPBOX_ACCESS_TOKEN=${VITE_MAPBOX_ACCESS_TOKEN}
+        - VITE_BACKEND_URL=${VITE_BACKEND_URL}
     ports:
       - "80:80"
     env_file:

@@ -13,6 +13,14 @@ RUN npm install
 # Copy the rest of your application code to the working directory
 COPY . .
 
+# Build arguments
+ARG VITE_MAPBOX_ACCESS_TOKEN
+ARG VITE_BACKEND_URL
+
+# Set environment variables for the build process
+ENV VITE_MAPBOX_ACCESS_TOKEN=${VITE_MAPBOX_ACCESS_TOKEN}
+ENV VITE_BACKEND_URL=${VITE_BACKEND_URL}
+
 # Build the React app
 RUN npm run build
 
@@ -23,7 +31,7 @@ FROM nginx:alpine
 COPY --from=build /app/dist /usr/share/nginx/html
 
 # Copy custom Nginx configuration file if needed
-COPY nginx.conf /etc/nginx/nginx.conf
+# COPY nginx.conf /etc/nginx/nginx.conf
 
 # Expose port 80
 EXPOSE 80
